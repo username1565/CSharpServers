@@ -58,10 +58,20 @@ namespace ConsoleServer
 	
     class Program
     {
-        const int port = 8888;
+        private static int port = 8888;
         static TcpListener listener;
         static void Main(string[] args)
         {
+			//program accept port, in args[0]
+			if(args.Length>=1){
+				int TryGetPort = 0;
+				if(int.TryParse(args[0], out TryGetPort))
+				{
+					port = TryGetPort;
+				}
+				Console.WriteLine("port: "+port);
+			}
+
             try
             {
                 listener = new TcpListener(IPAddress.Parse("127.0.0.1"), port);
@@ -88,5 +98,5 @@ namespace ConsoleServer
                     listener.Stop();
             }
         }
-    }	
+    }
 }

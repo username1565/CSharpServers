@@ -6,10 +6,20 @@ namespace ConsoleClient
 {
     class Program
     {
-        const int port = 8888;
+        private static int port = 8888;
         const string address = "127.0.0.1";
         static void Main(string[] args)
         {
+			//program accept port, in args[0]
+			if(args.Length>=1){
+				int TryGetPort = 0;
+				if(int.TryParse(args[0], out TryGetPort))
+				{
+					port = TryGetPort;
+				}
+				Console.WriteLine("port: "+port);
+			}
+			
             Console.Write("Введите свое имя:");
             string userName = Console.ReadLine();
             TcpClient client = null;

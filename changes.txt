@@ -1,3 +1,5 @@
+Use custom port, from args[0], specified as first argument.
+________________________________________________________________________________
 Add folder /source/, with source.
 Add "ConsoleServer.bat" and "ConsoleClient.bat" to compile both on windows.
 Add "ConsoleServer.sh" and "ConsoleClient.sh" to compile on linux with mono.

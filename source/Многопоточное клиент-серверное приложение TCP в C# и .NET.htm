@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html  lang="ru">
+<head>
+<title>Многопоточное клиент-серверное приложение TCP в C# и .NET</title>
+<meta charset="utf-8" />
+<meta name="description" content="Создание многопоточного TCP-сервера в C#, вынесение обработки запросов клиентов в отдельные потоки">
+<meta name="viewport" content="width=device-width">
+<link href="https://metanit.com/style40.css" rel="stylesheet" type="text/css">
+</head>
+<body>
+<div id="container">
+<header>
+<div id="header">
+<div id="logo">
+<a class="logoTitle" href="/" title="На главную">METANIT.COM</a>
+<div class="logoDefinition">Сайт о программировании</div> 
+</div>
+
+<div class="socbtns">
+<ul>
+<li><a title="Посмотреть меню" rel="nofollow" class="fa fa-lg fa-bars"></a></li>
+<li><a href="//metanit.com/donations.php" title="Помощь сайту" rel="nofollow" class="fa fa-lg fa-usd"></a></li>
+<li><a href="https://vk.com/metanit" title="Группа в ВКонтакте" rel="nofollow" class="fa fa-lg fa-vk"></a></li>
+<li><a href="https://twitter.com/Eugene225" title="Твиттер" rel="nofollow" class="fa fa-lg fa-twitter"></a></li>
+<li><a href="https://www.facebook.com/metanitcom"  rel="nofollow" class="fa fa-lg fa-facebook"></a></li>
+<li><a href="https://www.youtube.com/user/Eugene22584/" title="Канал сайта на Youtube" rel="nofollow" class="fa fa-lg fa-youtube"></a></li>
+<li><a href="https://t.me/metanit" title="Телеграмм" class="fa fa-lg fa-tel"></a></li>
+<li><i id="toggle-theme" class="fa fa-lg fa-adjust"></i></li>
+</ul>
+</div>
+
+
+<div id="magnifying-glass"></div>
+
+<div class="menuButton" id="menuButton">
+	<span class="icon-bar"></span>
+    <span class="icon-bar"></span>
+    <span class="icon-bar"></span>
+</div>
+</div>
+
+<div id="search" class="transp">
+<form action="https://www.google.ru" id="cse-search-box">
+  <div>
+    <input type="hidden" name="cx" value="partner-pub-3716042175333627:1096498938" />
+    <input type="hidden" name="ie" value="UTF-8" />
+    <input type="text" name="q" />
+    <input type="submit" name="sa" value="Найти" />
+  </div>
+</form>
+</div>
+
+<div id="menu" class="menu">
+<ul class="mainmenu">
+   <li><a href="//metanit.com/news/">Новости</a></li>
+   <li><a href="//metanit.com/sharp/">C#</a></li>
+   <li><a href="//metanit.com/java/">Java</a></li>
+   <li><a href="//metanit.com/web/">WEB</a></li>
+   <li><a href="//metanit.com/python/">Python</a></li>
+   <li><a href="//metanit.com/cpp/">C/C++</a></li>
+   <li><a href="//metanit.com/sql/">SQL</a></li>
+   <li><a href="//metanit.com/nosql/mongodb/">MongoDB</a></li>
+   <li><a href="//metanit.com/go/">Go</a></li>
+   <li><a href="//metanit.com/visualbasic/">VB.NET</a></li>
+   <li><a href="//metanit.com/swift/tutorial/">Swift</a></li>
+   <li><a href="//metanit.com/kotlin/">Kotlin</a></li>
+   <li><a href="//metanit.com/dart/">Dart</a></li>
+   <li><a href="//metanit.com/php/">PHP</a></li>
+   <li><a href="//metanit.com/rust/">Rust</a></li>
+   <li><a href="//metanit.com/f/">F#</a></li>
+   <li><a href="//metanit.com/settings.php">Настройки</a></li>
+</ul>
+</div>
+
+</header>
+<div class="outercontainer">
+<div class="innercontainer">
+ 
+   <div class="item center menC">
+     <h2>Многопоточное клиент-серверное приложение TCP</h2><div class="date">Последнее обновление: 31.10.2015</div>
+	<div class="socBlock">
+	<div class="share soctop">
+	<ul>
+	<li><a title="Поделиться в Вконтакте" rel="nofollow" class="fa fa-lg fa-vk"></a></li>
+	<li><a title="Поделиться в Телеграм" rel="nofollow" class="fa fa-lg fa-telegram"></a></li>
+	<li><a title="Поделиться в Одноклассниках" rel="nofollow" class="fa fa-lg fa-odnoklassniki"></a></li>
+	<li><a title="Поделиться в Твиттере" rel="nofollow" class="fa fa-lg fa-twitter"></a></li>
+	<li><a  rel="nofollow" class="fa fa-lg fa-facebook"></a></li>
+	</ul>
+	</div>
+	</div>
+
+	<div style="margin-top:23px;margin-left:5px;">
+				<style>
+		.footer-adaptive { width:100%; height: 250px; }
+		@media(min-width: 760px) { .footer-adaptive { max-width: 728px; height: 90px;  } }
+		@media(min-width: 900px) { .footer-adaptive { max-width: 468px; height: 60px;  } }
+		@media(min-width: 1100px) { .footer-adaptive{ max-width: 728px; height: 90px;} }
+		@media(min-width: 1400px) { .footer-adaptive { max-width: 970px; height: 90px;} }
+		</style>
+		<!-- footer_adaptive -->
+		<ins class="adsbygoogle footer-adaptive"
+			style="display:inline-block"
+			data-ad-client="ca-pub-3716042175333627"
+			data-ad-slot="9659512088"></ins>
+		<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+		<script>
+		(adsbygoogle = window.adsbygoogle || []).push({});
+		</script>
+			</div>
+
+	<p>Рассмотрим, как создать многопоточное клиент-серверное приложение. Фактически оно будет отличаться от однопоточного только тем, что обработка 
+запроса клиента будет вынесена в отдельный поток.</p>
+<p>Вначале создадим проект для клиента. Назовем проект ConsoleClient и в классе Program определим следующий код:</p>
+<pre class="brush:c#;">
+using System;
+using System.Net.Sockets;
+using System.Text;
+
+namespace ConsoleClient
+{
+    class Program
+    {
+        const int port = 8888;
+        const string address = "127.0.0.1";
+        static void Main(string[] args)
+        {
+            Console.Write("Введите свое имя:");
+            string userName = Console.ReadLine();
+            TcpClient client = null;
+            try
+            {
+                client = new TcpClient(address, port);
+                NetworkStream stream = client.GetStream();
+
+                while (true)
+                {
+                    Console.Write(userName + ": ");
+                    // ввод сообщения
+                    string message = Console.ReadLine();
+                    message = String.Format("{0}: {1}", userName, message);
+                    // преобразуем сообщение в массив байтов
+                    byte[] data = Encoding.Unicode.GetBytes(message);
+                    // отправка сообщения
+                    stream.Write(data, 0, data.Length);
+
+                    // получаем ответ
+                    data = new byte[64]; // буфер для получаемых данных
+                    StringBuilder builder = new StringBuilder();
+                    int bytes = 0;
+                    do
+                    {
+                        bytes = stream.Read(data, 0, data.Length);
+                        builder.Append(Encoding.Unicode.GetString(data, 0, bytes));
+                    }
+                    while (stream.DataAvailable);
+
+                    message = builder.ToString();
+                    Console.WriteLine("Сервер: {0}", message);
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+            finally
+            {
+                client.Close();
+            }
+        }
+    }
+}
+</pre>
+<p>В программе клиента пользователь будет вначале вводить свое имя, а затем сообщение для отправки. Причем сообщение будет уходить в формате 
+<code>Имя: сообщение</code>.</p>
+<p>После отправки сообщения клиент получает сообщение с сервера.</p>
+<p>Теперь создадим проект сервера, который назовем ConsoleServer. Вначале в проект сервера добавим новый класс <span class="bb">ClientObject</span>, который будет представлять отдельное подключение:</p>
+<pre class="brush:c#;">
+using System;
+using System.Net.Sockets;
+using System.Text;
+
+namespace ConsoleServer
+{
+    public class ClientObject
+    {
+        public TcpClient client;
+        public ClientObject(TcpClient tcpClient)
+        {
+            client = tcpClient;
+        }
+
+        public void Process()
+        {
+            NetworkStream stream = null;
+            try
+            {
+                stream = client.GetStream();
+                byte[] data = new byte[64]; // буфер для получаемых данных
+                while (true)
+                {
+                    // получаем сообщение
+                    StringBuilder builder = new StringBuilder();
+                    int bytes = 0;
+                    do
+                    {
+                        bytes = stream.Read(data, 0, data.Length);
+                        builder.Append(Encoding.Unicode.GetString(data, 0, bytes));
+                    }
+                    while (stream.DataAvailable);
+
+                    string message = builder.ToString();
+
+                    Console.WriteLine(message);
+                    // отправляем обратно сообщение в верхнем регистре
+                    message = message.Substring(message.IndexOf(':') + 1).Trim().ToUpper();
+                    data = Encoding.Unicode.GetBytes(message);
+                    stream.Write(data, 0, data.Length);
+                }
+            }
+            catch(Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+            finally
+            {
+                if (stream != null)
+                    stream.Close();
+                if (client != null)
+                    client.Close();
+            }
+        }
+    }
+}
+</pre>
+<p>В этом классе, наоборот, сначала получаем сообщение в цикле do..while и потом немного его изменяем (отрезаем по двоеточию и переводим в верхний 
+регистр) и отправляем обратно клиенту. То есть класс ClientObject заключает в себе все действия по работе с отдельным подключением.</p>
+<p>В главном классе проекта сервера определим следующий код:</p>
+<pre class="brush:c#;">
+using System;
+using System.Net;
+using System.Net.Sockets;
+using System.Threading;
+
+namespace ConsoleServer
+{
+    class Program
+    {
+        const int port = 8888;
+        static TcpListener listener;
+        static void Main(string[] args)
+        {
+            try
+            {
+                listener = new TcpListener(IPAddress.Parse("127.0.0.1"), port);
+                listener.Start();
+                Console.WriteLine("Ожидание подключений...");
+
+                while(true)
+                {
+                    TcpClient client = listener.AcceptTcpClient();
+                    ClientObject clientObject = new ClientObject(client);
+
+                    // создаем новый поток для обслуживания нового клиента
+                    Thread clientThread = new Thread(new ThreadStart(clientObject.Process));
+                    clientThread.Start();
+                }
+            }
+            catch(Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+            finally
+            {
+                if(listener!=null)
+                    listener.Stop();
+            }
+        }
+    }
+}
+</pre>
+<p>Сразу после подключения нового клиента:</p>
+<pre class="brush:c#;">
+TcpClient client = listener.AcceptTcpClient()
+</pre>
+<p>Создается объект ClientObject и новый поток, который запускает метод Process объекта ClientObject, где собственно и происходит получение и отправка сообщений. 
+Таким образом, сервер сможет одновременно обрабатывать сразу несколько запросов.</p>
+<p>Результаты работы программы. Один из клиентов:</p>
+<div class="console">
+<pre class="consoletext">
+Введите свое имя: Евгений
+Евгений: привет мир
+Сервер: ПРИВЕТ МИР
+Евгений: пока мир
+Сервер: ПОКА МИР
+Евгений: _
+</pre>
+</div>
+<p>Сервер:</p>
+<div class="console">
+<pre class="consoletext">
+Ожидание подключений...
+Евгений: привет мир
+Евгений: пока мир
+Том: привет чат
+</pre>
+</div>
+	
+	<div style="margin-top:25px;clear:both;">
+		<style>
+	.metanit-rect { width:100%; height: 250px; }
+	@media(min-width: 500px) { .metanit-rect { max-width: 336px; height: 280px; } }
+	@media(min-width: 760px) { .metanit-rect { max-width: 728px; height: 90px;  } }
+	@media(min-width: 900px) { .metanit-rect { max-width: 336px; height: 280px;  } }
+	@media(min-width: 1100px) { .metanit-rect{ max-width: 728px; height: 90px;} }
+	@media(min-width: 1400px) { .metanit-rect{ max-width: 970px; height: 90px;} }
+	</style>
+	<!-- metanit_rect -->
+	<ins class="adsbygoogle metanit-rect"
+		style="display:inline-block"
+		data-ad-client="ca-pub-3716042175333627"
+		data-ad-slot="3119477283"></ins>
+	<script>
+	(adsbygoogle = window.adsbygoogle || []).push({});
+	</script>
+		</div>
+
+	<div class="nav"><p><a href="4.2.php">Назад</a><a href="./">Содержание</a><a href="4.4.php">Вперед</a></p></div>
+	<div class="socBlock">
+	<div class="share soctop">
+	<ul>
+	<li><a title="Поделиться в Вконтакте" rel="nofollow" class="fa fa-lg fa-vk"></a></li>
+	<li><a title="Поделиться в Телеграм" rel="nofollow" class="fa fa-lg fa-telegram"></a></li>
+	<li><a title="Поделиться в Одноклассниках" rel="nofollow" class="fa fa-lg fa-odnoklassniki"></a></li>
+	<li><a title="Поделиться в Твиттере" rel="nofollow" class="fa fa-lg fa-twitter"></a></li>
+	<li><a rel="nofollow" class="fa fa-lg fa-facebook"></a></li>
+	</ul>
+	</div>
+	</div>
+
+	<style>
+	.commentABl { margin: 25px 0px 15px 0px;}
+	@media(min-width: 1000px) { .commentABl { margin: 35px 10px 15px 15px;  } }
+	</style>
+	<div class="commentABl" style="clear:both;">
+		<ins class="adsbygoogle metanit-rect"
+		style="display:inline-block"
+		data-ad-client="ca-pub-3716042175333627"
+		data-ad-slot="3119477283"></ins>
+	<script>
+	(adsbygoogle = window.adsbygoogle || []).push({});
+	</script>
+		</div>
+
+	
+	<div id="disqus_thread" style="margin-left:8px;margin-right:8px;clear:both;"></div>
+	<script type="text/javascript">
+	var disqus_shortname = 'metanitcom';
+	(function() {
+	var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+	dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+	(document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+	})();
+	</script>
+
+  </div>
+
+	<div class="item left">
+     <ul id="browser" class="filetree"> 
+	<li class="closed"><span class="folder">Глава 1. Основы работы с сетями в C# и .NET</span>
+		<ul>
+			<li><span class="file"><a href="//metanit.com/sharp/net/1.1.php">Введение в сети и протоколы</a></span></li>
+			<li><span class="file"><a href="//metanit.com/sharp/net/1.2.php">Адреса в .NET</a></span></li>
+		</ul>
+	</li>
+	<li class="closed"><span class="folder">Глава 2. Отправка запросов</span>
+		<ul>
+			<li><span class="file"><a href="//metanit.com/sharp/net/2.1.php">Класс WebClient</a></span></li>
+			<li><span class="file"><a href="//metanit.com/sharp/net/2.2.php">Классы WebRequest и WebResponse</a></span></li>
+			<li><span class="file"><a href="//metanit.com/sharp/net/2.3.php">Отправка данных в запросе</a></span></li>
+			<li><span class="file"><a href="//metanit.com/sharp/net/2.4.php">Обработка ошибок при запросах</a></span></li>
+		</ul>
+	</li>
+	<li class="closed"><span class="folder">Глава 3. Сокеты</span>
+		<ul>
+			<li><span class="file"><a href="//metanit.com/sharp/net/3.1.php">Класс Socket</a></span></li>
+			<li><span class="file"><a href="//metanit.com/sharp/net/3.2.php">Клиент-серверное приложение на сокетах TCP</a></span></li>
+			<li><span class="file"><a href="//metanit.com/sharp/net/3.3.php">Использование сокетов для работы с UDP</a></span></li>
+			</ul>
+	</li>
+	<li class="closed"><span class="folder">Глава 4. Протокол TCP</span>
+		<ul>
+			<li><span class="file"><a href="//metanit.com/sharp/net/4.1.php">TCP-клиент. Класс TcpClient</a></span></li>
+			<li><span class="file"><a href="//metanit.com/sharp/net/4.2.php">TCP-сервер. Класс TcpListener</a></span></li>
+			<li><span class="file"><a href="//metanit.com/sharp/net/4.3.php">Многопоточное клиент-серверное приложение TCP</a></span></li>
+			<li><span class="file"><a href="//metanit.com/sharp/net/4.4.php">Консольный TCP-чат</a></span></li>
+		</ul>
+	</li>
+	<li class="closed"><span class="folder">Глава 5. Протокол UDP</span>
+		<ul>
+			<li><span class="file"><a href="//metanit.com/sharp/net/5.1.php">UdpClient</a></span></li>
+			<li><span class="file"><a href="//metanit.com/sharp/net/5.2.php">Широковещательная рассылка</a></span></li>
+			<li><span class="file"><a href="//metanit.com/sharp/net/5.3.php">Чат c широковещательной рассылкой на Windows Forms</a></span></li>
+		</ul>
+	</li>
+	<li class="closed"><span class="folder">Глава 6. Потоки</span>
+		<ul>
+			<li><span class="file"><a href="//metanit.com/sharp/net/6.1.php">NetworkStream и текстовые потоки</a></span></li>
+			<li><span class="file"><a href="//metanit.com/sharp/net/6.2.php">Потоки бинарных данных</a></span></li>
+		</ul>
+	</li>
+	<li class="closed"><span class="folder">Глава 7. Протокол HTTP</span>
+		<ul>
+			<li><span class="file"><a href="//metanit.com/sharp/net/7.1.php">HttpListener</a></span></li>
+		</ul>
+	</li>
+	<li class="closed"><span class="folder">Глава 8. Работа с электронной почтой</span>
+		<ul>
+			<li><span class="file"><a href="//metanit.com/sharp/net/8.1.php">Отправка почты. SmtpClient</a></span></li>
+		</ul>
+	</li>
+	<li class="closed"><span class="folder">Глава 9. Протокол FTP</span>
+		<ul>
+			<li><span class="file"><a href="//metanit.com/sharp/net/9.1.php">FtpWebRequest и FtpWebResponse</a></span></li>
+			<li><span class="file"><a href="//metanit.com/sharp/net/9.2.php">Команды протокола FTP</a></span></li>
+		</ul>
+	</li>
+</ul>   </div>
+</div>
+
+  <div class="item right">
+
+		<style>
+	.meta-vert { width: 300px; height: 250px; }
+	@media(min-width: 500px) { .meta-vert { width: 336px; height: 280px; } }
+	@media(min-width: 900px) { .meta-vert { width: 160px; height: 600px; } }
+	@media(min-width: 1300px) { .meta-vert { width: 300px; height: 600px; } }
+	</style>
+	<!-- meta_vert -->
+	<ins class="adsbygoogle meta-vert"
+		style="display:inline-block"
+		data-ad-client="ca-pub-3716042175333627"
+		data-ad-slot="4596210485"></ins>
+	<script>
+	(adsbygoogle = window.adsbygoogle || []).push({});
+	</script>
+	
+      <div class="help">
+      <div class="help-header">Помощь сайту</div>
+      <div class="help-item">
+		<div class="help-item-name">YooMoney:</div>
+		<div class="help-item-req">410011174743222</div>
+	 </div>
+		<div class="help-item">
+		<div class="help-items-group">Перевод на карту</div>
+		<div class="help-item-name">Номер карты:</div>
+		<div class="help-item-req">4048415020898850</div>
+		<div class="help-item-name">Номер карты:</div>
+		<div class="help-item-req">4890494751804113</div>
+	 </div>
+      </div>
+  </div>
+</div>
+<div id="footer">
+
+<div class="bootomLinks">
+<a href="https://vk.com/metanit" title="Присоединиться к группе вконтакте" rel="nofollow">
+Вконтакте</a>|
+<a href="https://t.me/metanit" title="Подписаться на телеграм" rel="nofollow">
+Телеграм</a>|
+<a href="https://twitter.com/Eugene225" title="Подписаться на твит-ленту" rel="nofollow">
+Twitter</a>|
+<a href="https://www.youtube.com/user/Eugene22584/" title="Подписаться на канал на youtube" rel="nofollow">
+Канал сайта на youtube</a>|
+<a href="//metanit.com/donations.php" rel="nofollow">Помощь сайту</a>
+</div>
+<p>Контакты для связи: metanit22@mail.ru</p>
+<p>Copyright &copy; metanit.com, 2012-2022. Все права защищены.</p>
+</div>
+
+</div>
+
+
+<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+
+
+<script>
+const original = { open: XMLHttpRequest.prototype.open};
+XMLHttpRequest.prototype.open = function (method, url) {
+  if(url.includes("tempest.services.disqus.com")) return false;
+  return original.open.apply(this, arguments);
+};
+</script>
+<script type='text/javascript' src='https://metanit.com/js/syntax12.js'></script>
+<script type='text/javascript'>SyntaxHighlighter.all();</script>
+<script>
+document.querySelector(".fa-bars").addEventListener("click", ()=>{ 
+		const tree = document.querySelector(".item.left");
+		const display = tree.style.display;
+		if(display=="block") tree.style.display = "none";
+		else tree.style.display = "block";
+});
+
+const menuButton = document.getElementById("menuButton");
+document.getElementById("menuButton").addEventListener("click", ()=>{ 
+		menuButton.classList.toggle("menu-opened");
+		document.querySelector(".mainmenu").classList.toggle("open");
+});
+
+
+document.getElementById("magnifying-glass").addEventListener("click", ()=> 
+	document.getElementById("search").classList.toggle("transp")
+);
+
+document.getElementById("toggle-theme").addEventListener("click", ()=>{
+		if(document.documentElement.hasAttribute("theme")){
+			document.documentElement.removeAttribute("theme");
+			document.cookie="theme=1;expires=Mon, 19 Feb 2001 12:00:00 UTC;path=/;";
+		}
+		else{
+			document.documentElement.setAttribute("theme", "dark");
+			var expire = new Date();
+			expire.setHours(expire.getHours() + 7);
+			document.cookie="theme=1;expires=" + expire.toUTCString() + ";path=/;";
+		}
+	});
+
+
+document.querySelectorAll(".share .fa-vk").forEach(e => e.addEventListener("click", ()=> window.open("http://vk.com/share.php?url=" + window.location.href,"Поделиться в ВКОНТАКТЕ")));
+document.querySelectorAll(".share .fa-telegram").forEach(e => e.addEventListener("click", ()=> window.open("tg://msg_url/url=" + window.location.href,"Поделиться в Telegram")));
+document.querySelectorAll(".share .fa-odnoklassniki").forEach(e => e.addEventListener("click", ()=>window.open("https://connect.ok.ru/offer?url=" + window.location.href,"Поделиться в Одноклассниках")));
+document.querySelectorAll(".share .fa-twitter").forEach(e => e.addEventListener("click", ()=>window.open("http://twitter.com/share?url=" + window.location.href,"Поделиться в Твиттере")));
+document.querySelectorAll(".share .fa-facebook").forEach(e => e.addEventListener("click", ()=>window.open("http://www.facebook.com/sharer.php?u=" + window.location.href,"Поделиться")));
+
+const folders = document.getElementsByClassName("closed");
+for (let i = 0; i < folders.length; i++) {
+  folders[i].addEventListener("click", function() {
+
+    this.classList.toggle("closed");
+    this.classList.toggle("opened");
+  });
+}
+
+const activeItem = document.querySelector(".file a[href='//metanit.com" + location.pathname + "']");
+if(activeItem){
+activeItem.classList.add("aMItem");
+activeItem.parentElement.classList.add("aMItem");
+const activeFolder = activeItem.closest("li.closed");
+activeFolder.classList.toggle("closed");
+activeFolder.classList.toggle("opened");
+activeFolder.querySelector(".folder")?.classList.add("aMItem");
+}
+
+const props = ["--main-font-size", "--main-font-family", "--menc-bg-color", "--container-bg-color", "--menu-bg-color", "--code-font-size", "--code-font-family", "--code-bgcolor", "--code-max-height"];
+for(let i = 0; i < props.length; i++){
+    
+	const propValue = localStorage.getItem(props[i]);
+	if(propValue!==null)document.documentElement.style.setProperty(props[i], propValue);
+}
+</script>
+
+
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-35780297-1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-35780297-1');
+</script>
+<script async defer type="text/javascript" src="https://www.google.ru/coop/cse/brand?form=cse-search-box&amp;lang=ru"></script>
+</body>
+</html>

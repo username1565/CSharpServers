@@ -81,6 +81,19 @@ namespace HttpServer
 				}
 			}
 			if(
+					address.StartsWith(@"/messages/")
+			){
+				string page = address.Split(new string[]{"/messages/"}, StringSplitOptions.None)[1];
+				int _page = System.Convert.ToInt32(page);
+				
+				response =		@"<a href=""/feedback"">Back</a>"
+							+		SQLite3.SQLite3Methods.ShowMessages(_page)
+							+	@"<br>"
+							+		SQLite3.SQLite3Methods.GetPagesHTML()
+				;
+				return response;
+			}
+			if(
 					address.StartsWith(@"/message/")
 			){
 				string id = address.Split(new string[]{"/message/"}, StringSplitOptions.None)[1];
@@ -167,7 +180,7 @@ namespace HttpServer
 
 					bool saved = HttpForms.SaveMessageSQLite3(message);
 					if(!saved){
-						return "not saved" + @"<br> <a href=""./feedback"">Back</a>";
+						return "not saved" + @"<br> <a href=""/feedback"">Back</a>";
 					}
 					
 					
@@ -179,7 +192,7 @@ Message received!<br><br>"+
 "<div>"+subject+"</div>"+
 "<div>"+_message+"</div>"+
 "</div>"+
-@"<a href=""./feedback"">Go back</a>"
+@"<a href=""/feedback"">Go back</a>"
 					;
 			}
 			else if(
@@ -187,14 +200,15 @@ Message received!<br><br>"+
 					&&	address == @"/feedback"
 			){
 				
-				
+					SQLite3.SQLite3Methods.GetPages();
+					
 					response = @"<html>"+
 @"<head>
 	<meta charset=""UTF-8"">
 	<title>Feedback form</title>
 </head>
 <body>
-	<form id=""feedback_form"" method=""POST"" action=""./feedback"">
+	<form id=""feedback_form"" method=""POST"" action=""/feedback"">
 		<div>
 			<input id=""email"" name=""email"" type=""text"" placeholder=""email@mail.com"" value=""email@email.com""/>
 			<br>
@@ -216,8 +230,10 @@ Message received!<br><br>"+
 		</div>
 	</form>
 	"
-	+	SQLite3.SQLite3Methods.ShowMessages()	//show messages
-	+@"
+	+	SQLite3.SQLite3Methods.ShowMessages(-2)	//show messages
+	+	@"<br>"
+	+	SQLite3.SQLite3Methods.GetPagesHTML()
+	+	@"
 	<script>
 var form = document.getElementById('feedback_form');
 var files = document.getElementById('attachments');
@@ -252,27 +268,6 @@ files.addEventListener(
 		}
 	}
 );
-/*
-var email = document.getElementById('email');
-var subject = document.getElementById('subject');
-var message = document.getElementById('message');
-
-function replace_plus(){
-	email.value = email.value.replace('+', '%2B');
-	subject.value = subject.value.replace('+', '%2B');
-	message.value = message.value.replace('+', '%2B');
-}
-
-function input(e){
-	if(e.data === '+'){
-		replace_plus();
-	}
-}
-
-email.addEventListener('input', input);
-subject.addEventListener('input', input);
-message.addEventListener('input', input);
-*/	
 	</script>
 </body>
 </html>";	//page
@@ -282,7 +277,7 @@ message.addEventListener('input', input);
 					&&	address == @"/"				
 			)
 			{
-				response = @"<html><head><title>Main page</title></head><body><h1>Main page</h1>Feedback <a href=""./feedback"">here</a>!</body></html>";
+				response = @"<html><head><title>Main page</title></head><body><h1>Main page</h1>Feedback <a href=""/feedback"">here</a>!</body></html>";
 			}
 			else{
 				response = "";
@@ -301,7 +296,7 @@ message.addEventListener('input', input);
 			byte[] sendBytes;
 			
 		//	Console.WriteLine ("");
-			Console.WriteLine (request);
+		//	Console.WriteLine (request);
 			
 			object[] properties = HttpRequest.Properties(request);	//header, content and properties of HTTP-response
 		//	Console.WriteLine("(string)properties[0]: "+((string)properties[0]));
@@ -322,6 +317,7 @@ message.addEventListener('input', input);
 						address != "/"
 					&&	address != @"/feedback"
 					&&	!address.Contains(@"/message/")
+					&&	!address.Contains(@"/messages/")
 					&&	!address.Contains(@"/attachment/")
 			)
 			{

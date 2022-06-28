@@ -1,3 +1,9 @@
+Display messages partially.
+___________________________________________________
+Modify HttpResonse.cs and SQLite3Methods.cs
+to display messages
+
+___________________________________________________
 Add 9 files to support captcha:
 	\BitmapConvert.cs
 	\ByteEncryptionUtil.cs

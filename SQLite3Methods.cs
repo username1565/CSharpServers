@@ -208,8 +208,51 @@ VALUES(
 			}
 		}
 		
+/*
 		public static DataTable GetMessages(){
 			string sql = @"SELECT * FROM [Main].[Messages];";
+			DataTable result = PISDA.PISDA.GetDataTable(sql);
+			return result;
+		}
+*/
+
+		private static int messages_per_page = 100;
+		private static int MessagesCount = 0;
+		private static int pages = 0;
+		
+		public static int GetMessagesCount(){
+			string sql = @"SELECT COUNT(*) FROM [Main].[Messages];";
+			int result = System.Convert.ToInt32(PISDA.PISDA.ExecuteScalar(sql));
+			MessagesCount = result;
+			return result;
+		}
+		
+		public static int GetPages(){
+			int MessagesCount = GetMessagesCount();
+			int rest = MessagesCount % messages_per_page;
+			pages = ( ( MessagesCount - rest ) / messages_per_page ) + ( (rest == 0) ? 0 : 1);
+			return pages;
+		}
+
+		public static string GetPagesHTML(){
+			int pages = GetPages();
+			string HTML = "";
+			for(int i = 0; i<pages; i++){
+				HTML += @"<a href=""./messages/"
+								+i.ToString()
+						+@""">&gt;&gt;"
+								+i.ToString()
+						+@"</a>&nbsp;"
+				;
+			}
+			return HTML;
+		}
+
+		public static DataTable GetMessages(int page = -1){ //show all messages by default, or -2 to show last
+			if(page == -2){ page = pages-1; }
+			string skip = "LIMIT "+messages_per_page.ToString()+" OFFSET " + (messages_per_page*page).ToString();  	//LIMIT <count> OFFSET <skip>
+			
+			string sql = @"SELECT * FROM [Main].[Messages]" + ( (page != -1) ? skip : "" ) + @";";
 			DataTable result = PISDA.PISDA.GetDataTable(sql);
 			return result;
 		}
@@ -221,9 +264,9 @@ VALUES(
 		}
 		
 		
-		public static string ShowMessages(){
+		public static string ShowMessages(int page=-1){
 			string FeedBackForm = "<hr>";
-				DataTable messages = GetMessages();
+				DataTable messages = GetMessages(page);
 			//	Console.WriteLine("messages.Rows.Count: "+messages.Rows.Count);
 				for(int i = messages.Rows.Count-1; i>=0; i--){
 					DataRow message = messages.Rows[i];
@@ -312,7 +355,6 @@ VALUES(
 			return FeedBackForm;
 		}
 
-		
 //END SQLite-methods
 		
 		public static void Main()

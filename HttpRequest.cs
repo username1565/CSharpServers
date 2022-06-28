@@ -35,7 +35,12 @@ namespace HttpServer
 					string name = splitted_line[0].ToString();
 					string value = splitted_line[1].ToString();
 					
-					values[name] = value.ToString();
+					if(name=="attachments"){
+						continue;
+					}
+					else{
+						values[name] = value.ToString();
+					}
 				}
 			}
 			

@@ -1,3 +1,18 @@
+Add 7 files to support SQLite3 database:
+	\Compile_PISDA.bat
+	\Compile_SQLite3Methods.bat
+	\feedback.sqlite3.sql
+	\PISDA.cs
+	\SQLite3Methods.cs
+	\Mono.Data.Sqlite.dll
+	\sqlite3.dll
+HTTPServer.cs - open sqlite database or create this from "feedback.sqlite3.sql"
+HttpResponse.cs - use HttpForms.SaveMessageSQLite3(content);
+HttpRequest.cs - skip name=="attachments"
+HttpForms.cs - add method public static void SaveMessageSQLite3(Dictionary<string, string> message)
+Compile.bat - compile with Mono.Data.Sqlite.dll on windows
+Compile.sh - to compile with Mono.Data.Sqlite.dll on linux with mono
+___________________________________________________
 HttpForms.cs - extract attachments in GetPostArgs method.
 Add SaveMessage(Dictionary<string, string> message) - it's assept dictionary.
 

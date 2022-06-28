@@ -122,5 +122,15 @@ namespace HttpServer
 			//File.AppendAllText(@"messages/messages.txt", save_message);
 			File.WriteAllText(@"messages/" + timestamp+".txt", save_message);
 		}
+
+		public static void SaveMessageSQLite3(Dictionary<string, string> message){
+			try{
+				SQLite3.SQLite3Methods.AddMessage(message);
+			}
+			catch (Exception ex){
+				Console.WriteLine("SaveMessageSQLite3. ex: "+ex);
+				SaveMessage(message);
+			}
+		}		
 	}
 }

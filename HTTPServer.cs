@@ -11,6 +11,8 @@ namespace HttpServer
 	{ 
 		public static void Main (string[] args)
 		{
+			SQLite3.SQLite3Methods.openSQLite3Db();	//open SQLite3 database...
+
 		//	TcpServer.TcpServer.Main(args);	//just run TCPServer on the same "port".
 			TCPUDPServer.TCPUDPServer.Main(args);	//just run TCPServer on the same "port".
 		}

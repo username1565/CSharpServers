@@ -85,7 +85,8 @@ namespace HttpServer
 				//	Console.WriteLine("message: "+message);
 
 				//	HttpForms.SaveMessage(email, subject, message);
-					HttpForms.SaveMessage(content);
+				//	HttpForms.SaveMessage(content);
+					HttpForms.SaveMessageSQLite3(content);
 					
 					
 					
@@ -167,7 +168,7 @@ files.addEventListener(
 					&&	props["Address"] == @"/"				
 			)
 			{
-				response = @"<html><head><title>Hello world!</title></head><body><h1>Hello world!</h1>Hi!</body></html>";
+				response = @"<html><head><title>Main page</title></head><body><h1>Main page</h1>Feedback <a href=""./feedback"">here</a>!</body></html>";
 			}
 			else{
 				response = "";

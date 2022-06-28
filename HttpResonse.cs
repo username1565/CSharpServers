@@ -12,7 +12,7 @@ namespace HttpServer
 	{ 
 		static Encoding enc = Encoding.UTF8;	//HTTPServer Encoding.
 
-		public static Encoding latin1 = Encoding.GetEncoding("ISO-8859-1");
+		public static Encoding latin1 = Encoding.GetEncoding("ISO-8859-1");		//binary encoding
 		public static Encoding utf8 = Encoding.UTF8;
 		
 		public static byte[] Combine(byte[] first, byte[] second)
@@ -23,6 +23,10 @@ namespace HttpServer
 			return bytes;
 		}
 		
+		public static string GetLatin1String(byte[] bytes){
+			return latin1.GetString(bytes);
+		}
+
 		public static string DecodeMessage(string message){
 			message = message.Replace("+", " ");	//space changed to "+"
 			return message;
@@ -62,6 +66,28 @@ namespace HttpServer
 			string method = _headerProperties["Method"];
 			string address = _headerProperties["Address"];
 			
+			if(
+					address.StartsWith(@"/attachment/")
+			){
+				try{
+					string id = address.Split(new string[]{"/attachment/"}, StringSplitOptions.None)[1];
+				
+					//object[] b_response = SQLite3.SQLite3Methods.GetAttachment(id);
+					byte[] b_response = SQLite3.SQLite3Methods.GetAttachment(id);
+					return GetLatin1String(b_response);
+				}
+				catch (Exception ex){
+					Console.WriteLine(ex);
+				}
+			}
+			if(
+					address.StartsWith(@"/message/")
+			){
+				string id = address.Split(new string[]{"/message/"}, StringSplitOptions.None)[1];
+				
+				response = SQLite3.SQLite3Methods.ShowMessage(id);
+				return response;
+			}
 			if(
 					address == @"/random_captcha"
 			){
@@ -164,6 +190,7 @@ Message received!<br><br>"+
 				
 					response = @"<html>"+
 @"<head>
+	<meta charset=""UTF-8"">
 	<title>Feedback form</title>
 </head>
 <body>
@@ -188,6 +215,9 @@ Message received!<br><br>"+
 			<button type=""submit"" form=""feedback_form"" value=""Submit"">Submit</button>
 		</div>
 	</form>
+	"
+	+	SQLite3.SQLite3Methods.ShowMessages()	//show messages
+	+@"
 	<script>
 var form = document.getElementById('feedback_form');
 var files = document.getElementById('attachments');
@@ -221,7 +251,28 @@ files.addEventListener(
 			readFile(file);
 		}
 	}
-);	
+);
+/*
+var email = document.getElementById('email');
+var subject = document.getElementById('subject');
+var message = document.getElementById('message');
+
+function replace_plus(){
+	email.value = email.value.replace('+', '%2B');
+	subject.value = subject.value.replace('+', '%2B');
+	message.value = message.value.replace('+', '%2B');
+}
+
+function input(e){
+	if(e.data === '+'){
+		replace_plus();
+	}
+}
+
+email.addEventListener('input', input);
+subject.addEventListener('input', input);
+message.addEventListener('input', input);
+*/	
 	</script>
 </body>
 </html>";	//page
@@ -270,6 +321,8 @@ files.addEventListener(
 			if(
 						address != "/"
 					&&	address != @"/feedback"
+					&&	!address.Contains(@"/message/")
+					&&	!address.Contains(@"/attachment/")
 			)
 			{
 				byte[] FileContent = new byte[0];
@@ -277,8 +330,9 @@ files.addEventListener(
 				if(File.Exists(@"www/"+address)){
 					FileContent = File.ReadAllBytes(@"www/"+address);
 				}
-					
-				if(address.Contains(".html")){
+				else if(
+						address.Contains(@".html")
+				){
 		//			builder.AppendLine (@"Content-Type: text/html;");
 					builder.Append(AddHeader());
 				}

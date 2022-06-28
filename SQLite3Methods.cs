@@ -219,6 +219,100 @@ VALUES(
 			DataTable result = PISDA.PISDA.GetDataTable(sql);
 			return result;
 		}
+		
+		
+		public static string ShowMessages(){
+			string FeedBackForm = "<hr>";
+				DataTable messages = GetMessages();
+			//	Console.WriteLine("messages.Rows.Count: "+messages.Rows.Count);
+				for(int i = messages.Rows.Count-1; i>=0; i--){
+					DataRow message = messages.Rows[i];
+					FeedBackForm += "<div>";
+						FeedBackForm += "<div>";
+							FeedBackForm += "id: <a href=\"/message/"+message["id"]+"\">" + message["id"] +"</a>";
+						FeedBackForm += "</div>";
+						FeedBackForm += "<div>";
+							FeedBackForm += "email: " + message["email"];
+						FeedBackForm += "</div>";
+						FeedBackForm += "<div>";
+							FeedBackForm += "subject: " + message["subject"];
+						FeedBackForm += "</div>";
+						FeedBackForm += "<div>";
+							FeedBackForm += "message: " + message["message"];
+						FeedBackForm += "</div>";
+					FeedBackForm += "</div>";
+					FeedBackForm += "<hr>";
+				}
+			return FeedBackForm;
+		}
+
+		//public static object[] GetAttachment(string id){
+		public static byte[] GetAttachment(string id){
+			string sql = @"SELECT * FROM [Main].[MessagesAttachments] WHERE id="+id+";";
+			DataRow attachment = PISDA.PISDA.ReturnDataRow(sql);
+
+		//	return new object[] {
+		//			attachment["filename"]	//string
+		//		,	attachment["data"]	//byte[]
+		//	};
+
+			return (byte[]) attachment["data"];
+		}
+		
+		public static DataTable GetAttachmentsForMessage(string id){
+			string sql = @"SELECT * FROM [Main].[MessagesAttachments] WHERE MessageID = "+id+";";
+			DataTable result = PISDA.PISDA.GetDataTable(sql);
+			return result;
+		}
+		
+		public static DataRow GetMessage(string id){
+			string sql = @"SELECT * FROM [Main].[Messages] WHERE id="+id+@";";
+			DataRow result = PISDA.PISDA.ReturnDataRow(sql);
+			return result;
+		}
+
+		public static string ShowMessage(string id){
+			string FeedBackForm = @"<html>
+	<meta charset=""UTF-8"">
+	<head>
+	</head>
+	<body>
+	<a href=""/feedback"">Back</a>
+	<hr>";
+				DataRow message = GetMessage(id);
+					FeedBackForm += "<div>";
+						FeedBackForm += "<div>";
+							FeedBackForm += "id: <a href=\"/message/"+message["id"]+"\">" + message["id"] +"</a>";
+						FeedBackForm += "</div>";
+						FeedBackForm += "<div>";
+							FeedBackForm += "email: " + message["email"];
+						FeedBackForm += "</div>";
+						FeedBackForm += "<div>";
+							FeedBackForm += "subject: " + message["subject"];
+						FeedBackForm += "</div>";
+						FeedBackForm += "<div>";
+							FeedBackForm += "message: " + message["message"];
+						FeedBackForm += "</div>";
+					FeedBackForm += "</div>";
+					FeedBackForm += "<br><br>Attachments:<br>";
+					FeedBackForm += "<div>";
+						DataTable attachments = GetAttachmentsForMessage(id);
+						if(attachments.Rows.Count != 0){
+							for(int i = attachments.Rows.Count-1; i>=0; i--){
+								DataRow attachment = attachments.Rows[i];
+								//string dataURL = "data:application/octet-stream;base64,"+Convert.ToBase64String((byte[])attachment["data"]);
+								string dataURL = "/attachment/"+attachment["id"];
+								FeedBackForm += "<a href=\""+dataURL+"\" download=\""+attachment["filename"]+"\">"+attachment["filename"]+"</a><br>";
+							}
+						}
+					FeedBackForm += "</div>";
+					FeedBackForm += "<hr>";
+					FeedBackForm += "<body>";
+					FeedBackForm += "</html>";
+			return FeedBackForm;
+		}
+
+		
 //END SQLite-methods
 		
 		public static void Main()

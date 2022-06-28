@@ -1,1 +1,6 @@
+Add TcpServer.bat to build this server to exe, using csc.exe
+Add folder /source/
+Add TCPServer.bat to compile on windows
+Add TCPServer.sh to compile on linux, with mono
+____________________________________________________________________
 source: https://otus.ru/nest/post/350/

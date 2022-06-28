@@ -13,12 +13,42 @@ namespace HttpServer
 			return request;
 		}
 		
+		public static string DecodeQueryString(string QueryString){
+			string decoded = QueryString.Replace("+", " ");			//replace "+" to " "
+			decoded = System.Uri.UnescapeDataString(decoded);		//Decode urlencoded string
+			decoded = System.Web.HttpUtility.HtmlDecode(decoded);	//decode HTML entities
+			return decoded;											//return
+		}
+		
+		//parse QueryString, from content of GET or POST-request
+		public static Dictionary<string, string> GetParamValue(string GET_STRING){
+			Dictionary<string, string> KeyValue = new Dictionary<string, string>();
+			string[] parameters = GET_STRING.Split('&');	//split by "&"
+			for(var i = 0; i<parameters.Length; i++){
+				string [] param_value = parameters[i].Split('=');
+				string key = "";
+				string value = "";
+				if( param_value.Length == 2 ){
+					key = DecodeQueryString(param_value[0]);
+					value = DecodeQueryString(param_value[1]);
+					//add this into dictionary
+				}
+				else if(param_value.Length == 1){
+					key = DecodeQueryString(param_value[0]);
+				}
+				KeyValue[key] = value;
+			}
+			//and return dictionary.
+			return KeyValue;
+		}
+
+		//return properties from Header
 		public static Dictionary<string, string> HeaderProperties(string header){
 			Dictionary<string, string> values = new Dictionary<string, string>();
 			
 			//extract properties from header
-			string[] splitted_header = header.Split(new string[]{"\r\n"}, StringSplitOptions.None);
-			for(int line = 0; line<splitted_header.Length; line++)
+			string[] splitted_header = header.Split(new string[]{"\r\n"}, StringSplitOptions.None);	//spolit by "\r\n"
+			for(int line = 0; line<splitted_header.Length; line++)	//for each line
 			{
 				if(line == 0){
 					string[] FirstLine = splitted_header[line].Split(new string[]{" "}, StringSplitOptions.None);
@@ -35,7 +65,7 @@ namespace HttpServer
 					string name = splitted_line[0].ToString();
 					string value = splitted_line[1].ToString();
 					
-					if(name=="attachments"){
+					if(name=="attachments"){	//skip filenames of attachments
 						continue;
 					}
 					else{
@@ -54,6 +84,7 @@ namespace HttpServer
 			return values;
 		}
 
+		//return properties of request
 		public static object[] Properties(string request){
 			//request - it's string
 			
@@ -65,9 +96,26 @@ namespace HttpServer
 				string[] splitted = request.Split(new string[]{"\r\n\r\n"}, StringSplitOptions.None);
 				
 			//and write
-				header = splitted[splitted.Length-2];
-				content = splitted[splitted.Length-1];
+				header = splitted[0];
+				content = splitted[1];
 				
+				Dictionary<string, string> header_properties = HeaderProperties(header);
+				Dictionary<string, string> param_value = new Dictionary<string, string>();
+				
+				if(content.Contains("=")){
+					param_value = GetParamValue(content);
+				}
+			
+			//return object with properties of request
+				return new object[]{
+						header						//string
+					,	content						//string
+					,	header_properties			//Dictionary<string, string>
+					,	param_value					//param_value
+				};
+		}
+				
+/*
 				Dictionary<string, string> header_properties = HeaderProperties(header);
 
 //			Console.WriteLine("header: "+header+", content: "+content+", content.Length: "+content.Length);
@@ -78,6 +126,7 @@ namespace HttpServer
 					,	header_properties	//Dictionary<string, string>
 				};
 		}
+*/
 		
 	}
 }

@@ -25,7 +25,7 @@ namespace TcpServer
                 byte[] data = new byte[64]; // буфер для получаемых данных
                 while (true)
                 {
-					Console.WriteLine("Receiving message...");
+				//	Console.WriteLine("Receiving message...");
 				
                     // получаем сообщение
                     StringBuilder builder = new StringBuilder();
@@ -64,7 +64,7 @@ namespace TcpServer
 						byte[] response = HttpServer.HttpResponse.Response(message);
 						stream.Write (response, 0, response.Length);
 
-							Console.WriteLine("CloseStream and client");
+					//		Console.WriteLine("CloseStream and client");
 							stream.Close ();
 							client.Close ();
 							break;

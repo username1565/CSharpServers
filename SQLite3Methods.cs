@@ -152,7 +152,13 @@ namespace SQLite3
 					//messageText = latin1.GetString(utf8.GetBytes(message["message"])).Replace("'", "''");
 					messageText = (@message["message"]).Replace("'", "''");
 				}
-				else if(key == "attachments"){	//skip this value
+				else if(
+					new string[]{
+							"attachments"
+						,	"RandomCaptchaGuid"
+						,	"RandomCaptchaGuess"
+					}.Contains(key)
+				){	//skip this values
 					continue;
 				}
 				else{
@@ -176,7 +182,6 @@ VALUES(
 				
 				/*
 				Console.WriteLine("files.Count: "+files.Count);
-				
 				foreach (KeyValuePair<string, string> keypair in message)  
 				{
 					Console.WriteLine("key: "+keypair.Key+": value: "+keypair.Value);

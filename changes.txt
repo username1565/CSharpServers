@@ -1,3 +1,38 @@
+Add 9 files to support captcha:
+	\BitmapConvert.cs
+	\ByteEncryptionUtil.cs
+	\ByteStringExt.cs
+	\Captcha.cs
+	\CaptchaTracker.cs
+	\FileUtil.cs
+	\PostSignatureExt.cs
+	\Salsa20.cs
+	\Chaos.NaCl.dll
+	
+Compile.bat - compile with Chaos.NaCl.dll on windows
+Compile.sh - compile with Chaos.NaCl.dll on linux with mono
+TcpServer.cs - comment Console.WriteLine
+TCPClientObject.cs - comment Console.WriteLine
+SQLite3Methods.cs - exclude RandomCaptchaGuid and RandomCaptchaGuess
+HttpRequest.cs:
+	Add public static string DecodeQueryString(string QueryString)
+	Add public static Dictionary<string, string> GetParamValue(string GET_STRING)
+	Add comments
+	Add param_value in Properties-object.
+	
+HttpForms.cs
+	Remove public static string Decode(string str)
+	Remove public static Dictionary<string, string> getArgs(string content)
+	Add public static bool SaveMessage(Dictionary<string, string> message)
+	Add public static bool SaveMessageSQLite3(Dictionary<string, string> message)
+	
+HttpResponse.cs
+	Add public static string DecodeMessage(string message)
+	Add public static bool UseCaptcha = true;
+	Rewrite the rest to add supporting of captcha.
+
+
+___________________________________________________
 Add 7 files to support SQLite3 database:
 	\Compile_PISDA.bat
 	\Compile_SQLite3Methods.bat

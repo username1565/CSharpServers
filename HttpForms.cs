@@ -25,25 +25,6 @@ namespace HttpServer
 
 	class HttpForms
 	{
-		public static string Decode(string str){
-			return HttpUtility.HtmlDecode(System.Uri.UnescapeDataString(str));
-		}
-		
-		public static Dictionary<string, string> getArgs(string content){
-			Dictionary<string, string> PostArgs = new Dictionary<string, string>();
-
-			string[] splitted2 = content.Split('&');	//split by "&" to get arg-lines
-
-			//Console.WriteLine("splitted2.Length: "+splitted2.Length);
-			for(int i = 0; i<splitted2.Length; i++){		//for each line
-				string[] splitted3 = splitted2[i].Split('=');	//extract arg-value
-			//	Console.WriteLine("splitted3[0]: "+splitted3[0]);
-				PostArgs[splitted3[0]] = Decode(splitted3[1]);		//write this in dictionary
-			}
-			
-			return PostArgs;
-		}
-	
 		public static Dictionary<string, string> GetPostArgs(string request){
 			Dictionary<string, string> PostArgs = new Dictionary<string, string>();
 			
@@ -56,7 +37,7 @@ namespace HttpServer
 			for(int i = 0; i<splitted2.Length; i++){		//for each line
 				string[] splitted3 = splitted2[i].Split('=');	//extract arg-value
 			//	Console.WriteLine("splitted3[0]: "+splitted3[0]);
-				PostArgs[splitted3[0]] = Decode(splitted3[1]);		//write this in dictionary
+				PostArgs[splitted3[0]] = splitted3[1];				//write this in dictionary
 			}
 			
 /*
@@ -79,7 +60,7 @@ namespace HttpServer
 				
 			//	Console.WriteLine("splitted3[0]: "+splitted3[0]);
 				string key = splitted3[0];
-				string value = (attachments.Contains(key))? splitted3[1]: Decode(splitted3[1]);
+				string value = splitted3[1];
 				
 				PostArgs[key] = value;		//write this in dictionary
 			}
@@ -108,6 +89,7 @@ namespace HttpServer
 			File.WriteAllText(@"messages/" + timestamp+".txt", save_message);
 		}
 		
+/*
 		public static void SaveMessage(Dictionary<string, string> message){
 			string timestamp = GetCurrentUnixTimestamp();
 
@@ -130,6 +112,45 @@ namespace HttpServer
 			catch (Exception ex){
 				Console.WriteLine("SaveMessageSQLite3. ex: "+ex);
 				SaveMessage(message);
+			}
+		}
+*/
+		public static bool SaveMessage(Dictionary<string, string> message){
+			try{
+				string timestamp = GetCurrentUnixTimestamp();
+
+				string save_message = "";
+				foreach (KeyValuePair<string, string> keypair in message)  
+				{
+					//Console.WriteLine("Key: {0}, Value: {1}", keypair.Key, keypair.Value);
+					save_message += keypair.Key+": "+keypair.Value + "\r\n";
+				}
+				save_message += "\r\n";
+
+				//File.AppendAllText(@"messages/messages.txt", save_message);
+				File.WriteAllText(@"messages/" + timestamp+".txt", save_message);
+				return true;
+			}
+			catch
+			{
+				return false;
+			}
+		}
+
+		public static bool SaveMessageSQLite3(Dictionary<string, string> message){
+			if(HttpResponse.UseCaptcha == true){
+				bool result		=	captcha.Captcha.CheckAnswer(message["RandomCaptchaGuid"], message["RandomCaptchaGuess"]);
+				if(result == false){
+					return false;
+				}
+			}
+			
+			try{
+				return SQLite3.SQLite3Methods.AddMessage(message);
+			}
+			catch (Exception ex){
+				Console.WriteLine("SaveMessageSQLite3. ex: "+ex);
+				return SaveMessage(message);
 			}
 		}		
 	}

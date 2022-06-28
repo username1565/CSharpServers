@@ -23,6 +23,11 @@ namespace HttpServer
 			return bytes;
 		}
 		
+		public static string DecodeMessage(string message){
+			message = message.Replace("+", " ");	//space changed to "+"
+			return message;
+		}
+		
 		public static string AddHeader(
 				bool isBinary = false
 			,	int contentLength = 0
@@ -45,19 +50,61 @@ namespace HttpServer
 			return header;
 		}
 		
-		public static string DifferentRequests(
-				object[] properties					//properties
-			,	Dictionary <string, string> props	//Method, address, http
-		){
-			//Dictionary <string, string> props = (Dictionary <string, string>)properties[2];	//Method, address, http
-			
+		public static bool UseCaptcha = true; 
+		
+		public static string DifferentRequests(object[] properties)	//request properties
+		{
+			Dictionary <string, string> _headerProperties = (Dictionary <string, string>)properties[2];	//Method, address, http
+			Dictionary <string, string> param_value	= (Dictionary <string, string>)properties[3];		//Param_value from GET or POST-request
+
 			string response = "";
 			
+			string method = _headerProperties["Method"];
+			string address = _headerProperties["Address"];
+			
 			if(
-					props["Method"] == @"POST"
-				&&	props["Address"] == @"/feedback"
+					address == @"/random_captcha"
 			){
-					Console.WriteLine("Message received");
+				try{
+					if(method == @"GET"){
+						return @"<form action=""/random_captcha"" method=""post"">"+
+									captcha.Captcha.AddInputsOfRandomCaptchaToSomeForm()
+									+@"<button type=""submit"">Solve</button></form>"
+						;
+					}
+					else if(method == @"POST"){
+						/*
+						foreach (KeyValuePair<string, string> value in param_value)  
+						{
+							Console.WriteLine("Key: {0}, Value: {1}", value.Key, value.Value);  
+						}						
+						*/
+						bool result = false;
+						
+						if(UseCaptcha == true){
+							string RandomCaptchaGuid		=	param_value["RandomCaptchaGuid"]		;
+							string RandomCaptchaGuess		=	param_value["RandomCaptchaGuess"]	;
+				
+							result		=	captcha.Captcha.CheckAnswer(RandomCaptchaGuid, RandomCaptchaGuess);
+			//				Console.WriteLine("result: "+result);
+						}
+						else{
+							result = true;
+						}
+						response = result.ToString() + @"<br> <a href=""./random_captcha"">Back</a>";
+						return response;
+					}
+				}
+				catch(Exception ex){
+					Console.WriteLine("DifferentContent ex"+ex);
+					response = "";
+				}
+			}
+			if(
+					method == @"POST"
+				&&	address == @"/feedback"
+			){
+					Console.WriteLine(DateTime.Now.ToString("HH:mm:ss.fff") + ": New feedback received");
 					
 				/*
 					int i = 0;
@@ -67,27 +114,35 @@ namespace HttpServer
 					}
 				*/	
 					
-					Dictionary<string, string> content = HttpForms.getArgs((string)properties[1]);
+					//Dictionary<string, string> message = HttpForms.getArgs((string)properties[1]);
+					Dictionary<string, string> message = param_value;
 					
-				/*
-					foreach (KeyValuePair<string, string> value in content)  
+				
+					foreach (KeyValuePair<string, string> value in message)  
 					{
 						Console.WriteLine("Key: {0}, Value: {1}", value.Key, value.Value);  
 					}
-				*/
+				
 
 					
-				//	Console.WriteLine("content: "+content);
+				//	Console.WriteLine("message: "+message);
 					
-					string email = content["email"];
-					string subject = content["subject"];
-					string message = content["message"];
+					string email = message["email"];
+					string subject = message["subject"];
+					string _message = message["message"];
+					
+				//	Console.WriteLine("message: "+message);
+				//	message = DecodeMessage(message);					//replace +
 				//	Console.WriteLine("message: "+message);
 
 				//	HttpForms.SaveMessage(email, subject, message);
-				//	HttpForms.SaveMessage(content);
-					HttpForms.SaveMessageSQLite3(content);
-					
+				//	HttpForms.SaveMessage(message);
+				//	HttpForms.SaveMessageSQLite3(message);
+
+					bool saved = HttpForms.SaveMessageSQLite3(message);
+					if(!saved){
+						return "not saved" + @"<br> <a href=""./feedback"">Back</a>";
+					}
 					
 					
 					response = @"<html>
@@ -96,14 +151,14 @@ Message received!<br><br>"+
 "<div>"+
 "<div>"+email+"</div>"+
 "<div>"+subject+"</div>"+
-"<div>"+message+"</div>"+
+"<div>"+_message+"</div>"+
 "</div>"+
 @"<a href=""./feedback"">Go back</a>"
 					;
 			}
 			else if(
-						props["Method"] == @"GET"
-					&&	props["Address"] == @"/feedback"
+						method == @"GET"
+					&&	address == @"/feedback"
 			){
 				
 				
@@ -114,13 +169,21 @@ Message received!<br><br>"+
 <body>
 	<form id=""feedback_form"" method=""POST"" action=""./feedback"">
 		<div>
-			<input name=""email"" type=""text"" placeholder=""email@mail.com"" value=""email@email.com""/>
+			<input id=""email"" name=""email"" type=""text"" placeholder=""email@mail.com"" value=""email@email.com""/>
 			<br>
-			<input name=""subject"" type=""text"" placeholder=""subject"" value=""subject""/>
+			<input id=""subject"" name=""subject"" type=""text"" placeholder=""subject"" value=""subject""/>
 			<br>
-			<textarea name=""message"" placeholder=""message""/>message</textarea>
+			<textarea id=""message"" name=""message"" placeholder=""message""/>message</textarea>
 			<br>
 			<input id=""attachments"" name=""attachments"" type=""file"" multiple />
+			<br>
+			"
+				+	(
+						(UseCaptcha == true)
+							? captcha.Captcha.AddInputsOfRandomCaptchaToSomeForm()	//add captcha
+							: ""
+					)
+			+@"
 			<br>
 			<button type=""submit"" form=""feedback_form"" value=""Submit"">Submit</button>
 		</div>
@@ -158,14 +221,14 @@ files.addEventListener(
 			readFile(file);
 		}
 	}
-);		
+);	
 	</script>
 </body>
 </html>";	//page
 			}
 			else if(
-						props["Method"] == @"GET"
-					&&	props["Address"] == @"/"				
+						method == @"GET"
+					&&	address == @"/"				
 			)
 			{
 				response = @"<html><head><title>Main page</title></head><body><h1>Main page</h1>Feedback <a href=""./feedback"">here</a>!</body></html>";
@@ -174,7 +237,7 @@ files.addEventListener(
 				response = "";
 			}
 
-			Console.WriteLine(response);
+		//	Console.WriteLine(response);
 			return response;
 		}
 		
@@ -187,12 +250,14 @@ files.addEventListener(
 			byte[] sendBytes;
 			
 		//	Console.WriteLine ("");
-		//	Console.WriteLine (request);
+			Console.WriteLine (request);
 			
 			object[] properties = HttpRequest.Properties(request);	//header, content and properties of HTTP-response
 		//	Console.WriteLine("(string)properties[0]: "+((string)properties[0]));
-			Dictionary <string, string> props = (Dictionary <string, string>)properties[2];
-			Console.WriteLine("props[\"Method\"]: "+(props["Method"]));
+			Dictionary <string, string> _headerProperties	= (Dictionary <string, string>)properties[2];
+			Dictionary <string, string> param_value			= (Dictionary <string, string>)properties[3];
+			
+		//	Console.WriteLine("props[\"Method\"]: "+(props["Method"]));
 			
   
 			StringBuilder builder = new StringBuilder ();
@@ -200,13 +265,13 @@ files.addEventListener(
 
 		//	Console.WriteLine("request: "+request);
 
+			string address = _headerProperties["Address"];
+
 			if(
-						!request.StartsWith("GET / ")
-					&&	props["Address"] != @"/feedback"
+						address != "/"
+					&&	address != @"/feedback"
 			)
 			{
-				string details = request.Split(new string[]{"\r\n"}, StringSplitOptions.None)[0];
-				string address = details.Split(new string[]{" "}, StringSplitOptions.None)[1];
 				byte[] FileContent = new byte[0];
 				
 				if(File.Exists(@"www/"+address)){
@@ -231,12 +296,12 @@ files.addEventListener(
 				;
 			}
 			else{
-				Console.WriteLine("different requests...");
+		//		Console.WriteLine("different requests...");
 		//		builder.AppendLine (@"Content-Type: text/html");
 		//		builder.AppendLine (@"");
 
 				builder.Append(AddHeader());
-				builder.AppendLine (DifferentRequests(properties, props));
+				builder.AppendLine (DifferentRequests(properties));
 
 			//	Console.WriteLine ("");
 			//	Console.WriteLine ("responce...");

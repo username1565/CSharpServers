@@ -1,0 +1,16 @@
+<script>
+var xhr = new XMLHttpRequest();
+xhr.responseType = 'arraybuffer';
+xhr.open('GET', 'http://127.0.0.1:8082/test.txt', true);
+
+xhr.onload = function () {
+	console.log(xhr.status); //show object
+	if(xhr.status == 200){
+		var response = xhr.response;
+		var Uint8 = new Uint8Array(response);
+		console.log('Uint8', Uint8);
+	}
+};
+
+xhr.send(null);
+</script>

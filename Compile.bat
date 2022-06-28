@@ -4,6 +4,6 @@ set msbuild=%fdir%\v4.0.30319\msbuild.exe
 
 %csc% /out:HTTPServer.exe HTTPServer.cs
 
-HTTPServer.exe
+HTTPServer.exe 8082
 
 pause

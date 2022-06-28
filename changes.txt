@@ -1,3 +1,25 @@
+Return files from www-folder
+
+Add method Combine to combine bytes of headers, and bytes of file-content.
+Set port 8080 as default.
+Read port from args[0], if port is specified (first argument).
+Listen port on IPAddress.Any (0.0.0.0)
+Show IP and PORT, after start server
+If not root address, and if file exists - read file, and return file content as html-text, or as binary data;
+Do not show response in console.log, because binary content not displaying correctly.
+
+Compile.bat: run compiled HTTPServer.exe with another port 8082
+
+Now, any file from "www/"-folder, can be downloaded there: http://127.0.0.1:8082/filename.extension
+
+Add "test.html" and "test.txt" in 
+http://127.0.0.1:8082/test.html
+http://127.0.0.1:8082/test.txt
+
+Add GetBytes.html
+http://127.0.0.1:8082/GetBytes.html (return bytes of test.txt, in console.log)
+
+___________________________________________________
 Add Compile.bat to compile this server on windows.
 Add Compile.sh to compile this server on linux, with mono.
 ___________________________________________________

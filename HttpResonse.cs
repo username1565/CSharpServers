@@ -84,7 +84,8 @@ namespace HttpServer
 					string message = content["message"];
 				//	Console.WriteLine("message: "+message);
 
-					HttpForms.SaveMessage(email, subject, message);
+				//	HttpForms.SaveMessage(email, subject, message);
+					HttpForms.SaveMessage(content);
 					
 					
 					
@@ -118,9 +119,46 @@ Message received!<br><br>"+
 			<br>
 			<textarea name=""message"" placeholder=""message""/>message</textarea>
 			<br>
+			<input id=""attachments"" name=""attachments"" type=""file"" multiple />
+			<br>
 			<button type=""submit"" form=""feedback_form"" value=""Submit"">Submit</button>
 		</div>
 	</form>
+	<script>
+var form = document.getElementById('feedback_form');
+var files = document.getElementById('attachments');
+
+function readFile(file){
+			var reader = new FileReader();
+
+			reader.readAsDataURL(file);
+				reader.onload = function()
+				{
+					console.log(reader.result);
+					var input = document.createElement('input');
+					input.type = 'hidden';
+					input.name = file.name;
+					input.value = reader.result;
+					form.appendChild(input);
+				};
+
+			reader.onerror = function() {
+				console.log(reader.error);
+			};				
+}
+
+files.addEventListener(
+	'change',
+	function(e){
+		console.log(e);
+		for(var i = 0; i<files.files.length; i++){
+			var file = files.files[i];
+			console.log(file);
+			readFile(file);
+		}
+	}
+);		
+	</script>
 </body>
 </html>";	//page
 			}

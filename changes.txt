@@ -1,3 +1,11 @@
+HttpForms.cs - extract attachments in GetPostArgs method.
+Add SaveMessage(Dictionary<string, string> message) - it's assept dictionary.
+
+HttpResponse.cs - use HttpForms.SaveMessage(content); with dictionary
+Add script to read files into dataURLs
+
+Add /www/test_upload.html
+___________________________________________________
 Add feedback form in HttpResponse.cs
 Add HttpForms.cs
 Use value.ToString(); in HttpRequest.cs

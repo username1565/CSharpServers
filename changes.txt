@@ -1,3 +1,5 @@
+Add UDP support, according this source: https://stackoverflow.com/questions/46882815/c-sharp-sockets-tcp-udp/46927710#46927710
+________________________________________________________________________________
 Use custom port, from args[0], specified as first argument.
 ________________________________________________________________________________
 Add folder /source/, with source.

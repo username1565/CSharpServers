@@ -1,1 +1,4 @@
+Add Compile.bat to compile this server on windows.
+Add Compile.sh to compile this server on linux, with mono.
+___________________________________________________
 source: https://gist.github.com/vvakame/2633887

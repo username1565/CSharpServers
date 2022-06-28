@@ -26,7 +26,8 @@ namespace TcpServer
 			}
 			//else if TCP-request
 			else{
-				return new byte[0];
+				Console.WriteLine("TCPRequest accepted: "+request);
+				return Encoding.Unicode.GetBytes(request);	//echo
 			}
 		}
 	}

@@ -1,3 +1,16 @@
+Rewrite TcpServer.cs, comment old code, and add new code from this source: https://metanit.com/sharp/net/4.3.php
+Add file TCPClientObject.cs, with code, to handle connected client, in new Thread.
+Rewrite TcpRequest.cs, comment old code, and add new code from that source.
+Rewrite HttpRequest.cs, add methods to extract request-properties, and return this, as Dictionary.
+Rewrite HttpResonse.cs, add method to add headers for response, and use this method to buidld response.
+Add folder ConsoleClients, and put three files there:
+	ConsoleClient.cs
+	ConsoleClient.bat	- change port to 8082 here.
+	ConsoleClient.sh	- change port to 8082 here.
+
+Rewrite TcpResponse.cs, to return echo messages, from "ConsoleClient".
+___________________________________________________
+
 Split HTTPServer.cs to 6 files:
 	TcpServer.cs
 	HttpRequest.cs

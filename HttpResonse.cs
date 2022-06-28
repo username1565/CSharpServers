@@ -18,6 +18,29 @@ namespace HttpServer
 			return bytes;
 		}
 		
+		public static string AddHeader(
+				bool isBinary = false
+			,	int contentLength = 0
+		)
+		{
+			string header = "HTTP/1.1 200 OK" + "\r\n"
+				+ "Content-Type: " +
+					(
+						(isBinary == true)
+						? "application/octet-stream"
+						: "text/html"
+					) + "\r\n"
+				+ (
+					(contentLength != 0)
+						? "Content-Length: " + contentLength.ToString() + "\r\n"
+						: ""
+				)
+				+ "\r\n"
+			;
+			return header;
+		}
+
+		//Different HttpResponses
 		public static byte[] Response (string request)
 		{
 			//request = HttpRequest.Request(request);	//the same string
@@ -26,9 +49,13 @@ namespace HttpServer
 			
 			Console.WriteLine ("");
 			Console.WriteLine (request);
+			
+			object[] properties = HttpRequest.Properties(request);	//header and content
+			Console.WriteLine("(string)properties[1]: "+((string)properties[1]));
+			
   
 			StringBuilder builder = new StringBuilder ();
-			builder.AppendLine (@"HTTP/1.1 200 OK"); 
+		//	builder.AppendLine (@"HTTP/1.1 200 OK"); 
 				
 			Console.WriteLine("request: "+request);
 			if(!request.StartsWith("GET / ")){
@@ -41,13 +68,15 @@ namespace HttpServer
 				}
 					
 				if(address.Contains(".html")){
-					builder.AppendLine (@"Content-Type: text/html;");
+		//			builder.AppendLine (@"Content-Type: text/html;");
+					builder.Append(AddHeader());
 				}
 				else{
-					builder.AppendLine (@"Content-Type: application/octet-stream;");
+		//			builder.AppendLine (@"Content-Type: application/octet-stream;");
+					builder.Append(AddHeader(true, FileContent.Length));
 				}
-				builder.AppendLine (@"Content-Length: "+FileContent.Length.ToString());
-				builder.AppendLine (@"");
+		//		builder.AppendLine (@"Content-Length: "+FileContent.Length.ToString());
+		//		builder.AppendLine (@"");
 
 				sendBytes =	Combine(
 											enc.GetBytes (builder.ToString ())	//header-bytes
@@ -56,8 +85,10 @@ namespace HttpServer
 				;
 			}
 			else{
-				builder.AppendLine (@"Content-Type: text/html");
-				builder.AppendLine (@"");
+		//		builder.AppendLine (@"Content-Type: text/html");
+		//		builder.AppendLine (@"");
+
+				builder.Append(AddHeader());
 				builder.AppendLine (@"<html><head><title>Hello world!</title></head><body><h1>Hello world!</h1>Hi!</body></html>");
 
 			//	Console.WriteLine ("");

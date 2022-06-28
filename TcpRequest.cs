@@ -13,6 +13,7 @@ namespace TcpServer
 		//read TCP request from bytes to string
 		public static string ToString (NetworkStream stream)
 		{
+/*
 			MemoryStream memoryStream = new MemoryStream ();
 			byte[] data = new byte[256];
 			int size;
@@ -26,6 +27,26 @@ namespace TcpServer
 				memoryStream.Write (data, 0, size);
 			} while ( stream.DataAvailable); 
 			return utf8.GetString (memoryStream.ToArray ());
+*/
+
+					byte[] data = new byte[64]; // buffer to receive data
+                    
+					// receive message
+                    StringBuilder builder = new StringBuilder();
+                    int bytes = 0;
+                    do
+                    {
+                        bytes = stream.Read(data, 0, data.Length);
+                        builder.Append(Encoding.Unicode.GetString(data, 0, bytes));
+                    }
+                    while (stream.DataAvailable);
+
+                    string message = builder.ToString();
+ 
+                    Console.WriteLine(message);
+					return message;
+
+			
 		}
 	}
 }

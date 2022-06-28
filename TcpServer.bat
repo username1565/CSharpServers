@@ -6,6 +6,9 @@ set program=TcpServer
 
 %csc% /out:%program%.exe %program%.cs
 
+:: show current encoding:
+chcp
+
 start telnet 127.0.0.1 1234
 
 %program%.exe

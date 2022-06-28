@@ -1,3 +1,15 @@
+Split HTTPServer.cs to 6 files:
+	TcpServer.cs
+	HttpRequest.cs
+	HttpResonse.cs
+	HTTPServer.cs
+	TcpRequest.cs
+	TcpResponse.cs
+
+Rewrite Compile.bat to build all files, with /main:HttpServer.HttpServer, on windows
+Rewrite Compile.sh to build all files, with /main:HttpServer.HttpServer on linux, with mono
+
+___________________________________________________
 Return files from www-folder
 
 Add method Combine to combine bytes of headers, and bytes of file-content.

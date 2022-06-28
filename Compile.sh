@@ -1,2 +1,2 @@
-csc /out:HTTPServer.exe HTTPServer.cs
-mono HTTPServer.exe 8082
+csc /main:HttpServer.HttpServer /out:HTTPServer.exe *.cs
+mono HTTPServer.exe

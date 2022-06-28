@@ -11,7 +11,8 @@ namespace HttpServer
 	{ 
 		public static void Main (string[] args)
 		{
-			TcpServer.TcpServer.Main(args);	//just run TCPServer on the same "port".
+		//	TcpServer.TcpServer.Main(args);	//just run TCPServer on the same "port".
+			TCPUDPServer.TCPUDPServer.Main(args);	//just run TCPServer on the same "port".
 		}
 	}
 }

@@ -1,3 +1,17 @@
+Add TcpUdpServer.cs
+Change HTTPServer.cs, to run this.
+Rewrite TCPClientObject.cs, show TCP there, instead of message, and return message, without UpperCase.
+Add 4 files in ConsoleClients folder:
+	TcpUdpClients.cs
+	TcpUdpClients.bat
+	TcpUdpClients.sh
+	ConsoleTCPUDPClient.cs
+	ConsoleTCPUDPClient.bat
+	ConsoleTCPUDPClient.sh
+
+Now it's TCP/UDP/HTTP Server, and TCP/UDP/HTTP-clients can be connected on the same port.
+___________________________________________________
+
 Rewrite TcpServer.cs, comment old code, and add new code from this source: https://metanit.com/sharp/net/4.3.php
 Add file TCPClientObject.cs, with code, to handle connected client, in new Thread.
 Rewrite TcpRequest.cs, comment old code, and add new code from that source.

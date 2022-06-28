@@ -3,6 +3,7 @@ using System.IO;
 using System.Text;
 using System.Net;
 using System.Net.Sockets;
+using System.Collections.Generic;	//Dictionary
 
 namespace HttpServer
 {
@@ -47,17 +48,20 @@ namespace HttpServer
 
 			byte[] sendBytes;
 			
-			Console.WriteLine ("");
-			Console.WriteLine (request);
+		//	Console.WriteLine ("");
+		//	Console.WriteLine (request);
 			
-			object[] properties = HttpRequest.Properties(request);	//header and content
-			Console.WriteLine("(string)properties[1]: "+((string)properties[1]));
+			object[] properties = HttpRequest.Properties(request);	//header, content and properties of HTTP-response
+		//	Console.WriteLine("(string)properties[0]: "+((string)properties[0]));
+			Dictionary <string, string> props = (Dictionary <string, string>)properties[2];
+			Console.WriteLine("props[\"Method\"]: "+(props["Method"]));
 			
   
 			StringBuilder builder = new StringBuilder ();
 		//	builder.AppendLine (@"HTTP/1.1 200 OK"); 
-				
-			Console.WriteLine("request: "+request);
+
+		//	Console.WriteLine("request: "+request);
+
 			if(!request.StartsWith("GET / ")){
 				string details = request.Split(new string[]{"\r\n"}, StringSplitOptions.None)[0];
 				string address = details.Split(new string[]{" "}, StringSplitOptions.None)[1];

@@ -1,3 +1,8 @@
+Add feedback form in HttpResponse.cs
+Add HttpForms.cs
+Use value.ToString(); in HttpRequest.cs
+Add folder "/messages/" to save messages there.
+___________________________________________________
 Add TcpUdpServer.cs
 Change HTTPServer.cs, to run this.
 Rewrite TCPClientObject.cs, show TCP there, instead of message, and return message, without UpperCase.

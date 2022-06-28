@@ -4,12 +4,16 @@ using System.Text;
 using System.Net;
 using System.Net.Sockets;
 using System.Collections.Generic;	//Dictionary
+using HttpServer;
 
 namespace HttpServer
 {
 	class HttpResponse
 	{ 
 		static Encoding enc = Encoding.UTF8;	//HTTPServer Encoding.
+
+		public static Encoding latin1 = Encoding.GetEncoding("ISO-8859-1");
+		public static Encoding utf8 = Encoding.UTF8;
 		
 		public static byte[] Combine(byte[] first, byte[] second)
 		{
@@ -40,6 +44,101 @@ namespace HttpServer
 			;
 			return header;
 		}
+		
+		public static string DifferentRequests(
+				object[] properties					//properties
+			,	Dictionary <string, string> props	//Method, address, http
+		){
+			//Dictionary <string, string> props = (Dictionary <string, string>)properties[2];	//Method, address, http
+			
+			string response = "";
+			
+			if(
+					props["Method"] == @"POST"
+				&&	props["Address"] == @"/feedback"
+			){
+					Console.WriteLine("Message received");
+					
+				/*
+					int i = 0;
+					foreach(object key in properties){
+						Console.WriteLine(i+"blahblah: "+key);
+						i++;
+					}
+				*/	
+					
+					Dictionary<string, string> content = HttpForms.getArgs((string)properties[1]);
+					
+				/*
+					foreach (KeyValuePair<string, string> value in content)  
+					{
+						Console.WriteLine("Key: {0}, Value: {1}", value.Key, value.Value);  
+					}
+				*/
+
+					
+				//	Console.WriteLine("content: "+content);
+					
+					string email = content["email"];
+					string subject = content["subject"];
+					string message = content["message"];
+				//	Console.WriteLine("message: "+message);
+
+					HttpForms.SaveMessage(email, subject, message);
+					
+					
+					
+					response = @"<html>
+<meta charset=""UTF-8"">
+Message received!<br><br>"+
+"<div>"+
+"<div>"+email+"</div>"+
+"<div>"+subject+"</div>"+
+"<div>"+message+"</div>"+
+"</div>"+
+@"<a href=""./feedback"">Go back</a>"
+					;
+			}
+			else if(
+						props["Method"] == @"GET"
+					&&	props["Address"] == @"/feedback"
+			){
+				
+				
+					response = @"<html>"+
+@"<head>
+	<title>Feedback form</title>
+</head>
+<body>
+	<form id=""feedback_form"" method=""POST"" action=""./feedback"">
+		<div>
+			<input name=""email"" type=""text"" placeholder=""email@mail.com"" value=""email@email.com""/>
+			<br>
+			<input name=""subject"" type=""text"" placeholder=""subject"" value=""subject""/>
+			<br>
+			<textarea name=""message"" placeholder=""message""/>message</textarea>
+			<br>
+			<button type=""submit"" form=""feedback_form"" value=""Submit"">Submit</button>
+		</div>
+	</form>
+</body>
+</html>";	//page
+			}
+			else if(
+						props["Method"] == @"GET"
+					&&	props["Address"] == @"/"				
+			)
+			{
+				response = @"<html><head><title>Hello world!</title></head><body><h1>Hello world!</h1>Hi!</body></html>";
+			}
+			else{
+				response = "";
+			}
+
+			Console.WriteLine(response);
+			return response;
+		}
+		
 
 		//Different HttpResponses
 		public static byte[] Response (string request)
@@ -62,7 +161,11 @@ namespace HttpServer
 
 		//	Console.WriteLine("request: "+request);
 
-			if(!request.StartsWith("GET / ")){
+			if(
+						!request.StartsWith("GET / ")
+					&&	props["Address"] != @"/feedback"
+			)
+			{
 				string details = request.Split(new string[]{"\r\n"}, StringSplitOptions.None)[0];
 				string address = details.Split(new string[]{" "}, StringSplitOptions.None)[1];
 				byte[] FileContent = new byte[0];
@@ -89,11 +192,12 @@ namespace HttpServer
 				;
 			}
 			else{
+				Console.WriteLine("different requests...");
 		//		builder.AppendLine (@"Content-Type: text/html");
 		//		builder.AppendLine (@"");
 
 				builder.Append(AddHeader());
-				builder.AppendLine (@"<html><head><title>Hello world!</title></head><body><h1>Hello world!</h1>Hi!</body></html>");
+				builder.AppendLine (DifferentRequests(properties, props));
 
 			//	Console.WriteLine ("");
 			//	Console.WriteLine ("responce...");

@@ -35,7 +35,7 @@ namespace HttpServer
 					string name = splitted_line[0].ToString();
 					string value = splitted_line[1].ToString();
 					
-					values[name] = value;
+					values[name] = value.ToString();
 				}
 			}
 			

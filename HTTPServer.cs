@@ -11,6 +11,14 @@ namespace HttpServer
 	{ 
 		public static void Main (string[] args)
 		{
+			if(args.Length >= 2){
+				if(args[1] == "True" || args[1] == "true" || args[1] == "captcha")
+				{
+					HttpResponse.UseCaptcha = true;
+				}
+			}
+			
+		
 			SQLite3.SQLite3Methods.openSQLite3Db();	//open SQLite3 database...
 
 		//	TcpServer.TcpServer.Main(args);	//just run TCPServer on the same "port".

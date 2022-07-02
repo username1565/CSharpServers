@@ -54,10 +54,11 @@ namespace HttpServer
 			return header;
 		}
 		
-		public static bool UseCaptcha = true; 
+		public static bool UseCaptcha = false; 
 		
 		public static string DifferentRequests(object[] properties)	//request properties
 		{
+		//	Console.WriteLine("DifferentRequests...");
 			Dictionary <string, string> _headerProperties = (Dictionary <string, string>)properties[2];	//Method, address, http
 			Dictionary <string, string> param_value	= (Dictionary <string, string>)properties[3];		//Param_value from GET or POST-request
 
@@ -66,20 +67,6 @@ namespace HttpServer
 			string method = _headerProperties["Method"];
 			string address = _headerProperties["Address"];
 			
-			if(
-					address.StartsWith(@"/attachment/")
-			){
-				try{
-					string id = address.Split(new string[]{"/attachment/"}, StringSplitOptions.None)[1];
-				
-					//object[] b_response = SQLite3.SQLite3Methods.GetAttachment(id);
-					byte[] b_response = SQLite3.SQLite3Methods.GetAttachment(id);
-					return GetLatin1String(b_response);
-				}
-				catch (Exception ex){
-					Console.WriteLine(ex);
-				}
-			}
 			if(
 					address.StartsWith(@"/messages/")
 			){
@@ -208,6 +195,9 @@ Message received!<br><br>"+
 	<title>Feedback form</title>
 </head>
 <body>
+"
++
+@"
 	<form id=""feedback_form"" method=""POST"" action=""/feedback"">
 		<div>
 			<input id=""email"" name=""email"" type=""text"" placeholder=""email@mail.com"" value=""email@email.com""/>
@@ -217,6 +207,8 @@ Message received!<br><br>"+
 			<textarea id=""message"" name=""message"" placeholder=""message""/>message</textarea>
 			<br>
 			<input id=""attachments"" name=""attachments"" type=""file"" multiple />
+			<br>
+			<input id=""attached_files"" name=""attached_files"" type=""hidden"" />
 			<br>
 			"
 				+	(
@@ -230,47 +222,74 @@ Message received!<br><br>"+
 		</div>
 	</form>
 	"
+
 	+	SQLite3.SQLite3Methods.ShowMessages(-2)	//show messages
 	+	@"<br>"
 	+	SQLite3.SQLite3Methods.GetPagesHTML()
+
 	+	@"
-	<script>
-var form = document.getElementById('feedback_form');
-var files = document.getElementById('attachments');
+<script>
+var feedback_form = document.getElementById('feedback_form');
+var attachments = document.getElementById('attachments');
+var attached_files = document.getElementById('attached_files');
 
-function readFile(file){
-			var reader = new FileReader();
-
-			reader.readAsDataURL(file);
-				reader.onload = function()
-				{
-					console.log(reader.result);
-					var input = document.createElement('input');
-					input.type = 'hidden';
-					input.name = file.name;
-					input.value = reader.result;
-					form.appendChild(input);
-				};
-
-			reader.onerror = function() {
-				console.log(reader.error);
-			};				
+var busy = false;
+function upload(filename, dataURL)
+{
+	busy = true;
+	var xhr_interval;
+	var xhr = new XMLHttpRequest();
+	xhr.open('POST', '/upload');
+	xhr.onload = function(){
+        console.log(xhr.responseText);
+		busy = false;
+		var namefile = filename.split('\0').join('');
+		attached_files.value += ((attached_files.value === '') ? '' : '&' ) + ( namefile +'='+xhr.responseText.trim() ) ;	//rowid of added file
+    };
+	xhr.send(filename + dataURL);
 }
 
-files.addEventListener(
-	'change',
-	function(e){
-		console.log(e);
-		for(var i = 0; i<files.files.length; i++){
-			var file = files.files[i];
-			console.log(file);
-			readFile(file);
-		}
+function readFile(file, filename){
+	busy = true;
+	var reader = new FileReader();
+	reader.onload = function(e) {
+		for(var i = filename.length; i<256; i++){filename += '\0';}		//add padding with nulls, up to 256 chars
+		upload(filename, reader.result);								//and upload it
+	}
+	reader.onerror = function() {
+		console.log(reader.error);
+	};
+	reader.readAsDataURL(file);
+}
+
+var i = 0;
+var interval;
+attachments.addEventListener(
+		'change'
+	,	function(e){
+			attached_files.value = '';
+			i = 0;
+			interval = setInterval(
+				function(){
+					if(busy == false){
+						if(i<attachments.files.length){
+							readFile(attachments.files[i], attachments.files[i].name);		//read and upload it
+							i++;
+						}
+						else{
+							clearInterval(interval);
+						}
+					}
+				},
+				100
+			);
 	}
 );
-	</script>
+</script>
 </body>
-</html>";	//page
+</html>
+"		
+;
 			}
 			else if(
 						method == @"GET"
@@ -293,10 +312,34 @@ files.addEventListener(
 		{
 			//request = HttpRequest.Request(request);	//the same string
 
+			StringBuilder builder = new StringBuilder ();
 			byte[] sendBytes;
 			
 		//	Console.WriteLine ("");
-		//	Console.WriteLine (request);
+		//	Console.WriteLine ("Response: "+request);
+			
+			if(
+					request.Contains(@"POST")
+				&&	request.Contains(@"/upload")
+			){
+				string content = request.Split(new string[]{"\r\n\r\n"}, StringSplitOptions.None)[1];
+				string filename = (content.Substring(0, 256)).Replace("\0", string.Empty);
+				string path = "Attachments" + Path.DirectorySeparatorChar + filename;
+				string filecontent = content.Substring(256);
+
+				//filecontent = filecontent.Split(',')[1];
+				//byte[] FileContent = Convert.FromBase64String(filecontent);
+				//File.WriteAllBytes(@path, FileContent);
+				//string response = @"/Attachments/"+filename;
+				
+				int rowid = SQLite3.SQLite3Methods.AddAttachment(filename, filecontent);
+				string response = rowid.ToString();
+
+				builder.Append(AddHeader());
+				builder.AppendLine (response);
+				sendBytes = enc.GetBytes (builder.ToString ());
+				return sendBytes;
+			}
 			
 			object[] properties = HttpRequest.Properties(request);	//header, content and properties of HTTP-response
 		//	Console.WriteLine("(string)properties[0]: "+((string)properties[0]));
@@ -306,29 +349,34 @@ files.addEventListener(
 		//	Console.WriteLine("props[\"Method\"]: "+(props["Method"]));
 			
   
-			StringBuilder builder = new StringBuilder ();
 		//	builder.AppendLine (@"HTTP/1.1 200 OK"); 
 
 		//	Console.WriteLine("request: "+request);
+		//	PISDA.PISDA.Log("request: "+request);
 
 			string address = _headerProperties["Address"];
 
 			if(
-						address != "/"
+						address != @"/"
 					&&	address != @"/feedback"
 					&&	!address.Contains(@"/message/")
 					&&	!address.Contains(@"/messages/")
 					&&	!address.Contains(@"/attachment/")
+					&&	!address.Contains(@"/upload")
 			)
 			{
+			//	Console.WriteLine("return file");
 				byte[] FileContent = new byte[0];
 				
+				Console.WriteLine("Return file. address: "+address);
 				if(File.Exists(@"www/"+address)){
 					FileContent = File.ReadAllBytes(@"www/"+address);
 				}
-				else if(
+				
+				if(
 						address.Contains(@".html")
 				){
+		//			Console.WriteLine("add text/html header");
 		//			builder.AppendLine (@"Content-Type: text/html;");
 					builder.Append(AddHeader());
 				}
@@ -344,6 +392,25 @@ files.addEventListener(
 										,	FileContent							//FileContent-bytes
 									)
 				;
+			}
+			else if(address.Contains(@"/attachment/")){
+				try{
+					string id = address.Split(new string[]{"/attachment/"}, StringSplitOptions.None)[1];
+				
+					//object[] b_response = SQLite3.SQLite3Methods.GetAttachment(id);
+					byte[] b_response = SQLite3.SQLite3Methods.GetAttachment(id);
+					Console.WriteLine("b_response.Length: "+b_response.Length);
+					builder.Append(AddHeader(true, b_response.Length));
+					sendBytes =	Combine(
+											enc.GetBytes (builder.ToString ())	//header-bytes
+										,	b_response							//FileContent-bytes
+									)
+					;					
+				}
+				catch (Exception ex){
+					Console.WriteLine(ex);
+					sendBytes = new byte[0];
+				}				
 			}
 			else{
 		//		Console.WriteLine("different requests...");

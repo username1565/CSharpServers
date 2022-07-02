@@ -564,13 +564,14 @@ namespace PISDA
 		,	object[] values = null	//object[] values = new object[]{null, "Text", 123, null, 1234, 123, 123, new byte[] { 1, 2, 3, 4, 5 } };
 									//array with objects, with different types (NULL, TEXT, NUMERIC, INTEGER, REAL, BLOB).
 									//First value must to be "null" for - auto-incremented column.
+		,	int Or=0			//0 = insert, 1 - or replace, 2 - or ignore
 		)
 		{
 			if(values != null){
 				lock(db_lock){
 					//Build SQL-request, to add this values in the cells of the row
 					string sql =
-							"INSERT INTO "+TableName
+							"INSERT"+((Or==0)? "" : (Or==1) ? " OR REPLACE": " OR IGNORE ")+" INTO "+TableName
 						+	" VALUES("	 //?,?,?,...,?);
 					;
 					//Add this ? and , and bracket ")"
@@ -612,11 +613,15 @@ namespace PISDA
 		public static object ExecuteScalar(
 			string sql
 		,	bool show = false
+		,	byte[] blob = null
 		)
 		{
 			try{
 				lock(db_lock){
 					using(cmd = new Mono.Data.Sqlite.SqliteCommand(sql, Connection)){	//create new Mono.Data.Sqlite.SqliteCommand for current connection, after open this, and add sql-query there.
+						if(blob != null){
+							cmd.Parameters.Add("@blob", System.Data.DbType.Binary, 20).Value = blob;		
+						}
 						object value = _cmd.ExecuteScalar();
 						CloseConnectionIfNeed();
 						if (value != null)

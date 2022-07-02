@@ -18,6 +18,17 @@ CREATE TABLE [main].[!CreationHistory](
   [Action] TEXT, 
   [Description] TEXT);
 
+/* Drop table [Attachments] */
+DROP TABLE IF EXISTS [main].[Attachments];
+
+/* Table structure [Attachments] */
+CREATE TABLE [main].[Attachments](
+  [id] INTEGER PRIMARY KEY AUTOINCREMENT, 
+  [filename] TEXT, 
+  [data] BLOB, 
+  UNIQUE([filename], [data]) ON CONFLICT IGNORE);
+CREATE INDEX [main].[AttachmentsIndex] ON [Attachments]([id]);
+
 /* Drop table [Messages] */
 DROP TABLE IF EXISTS [main].[Messages];
 
@@ -39,32 +50,42 @@ DROP TABLE IF EXISTS [main].[MessagesAttachments];
 CREATE TABLE [main].[MessagesAttachments](
   [id] INTEGER PRIMARY KEY AUTOINCREMENT, 
   [MessageID] INTEGER REFERENCES [Messages]([id]) ON DELETE CASCADE, 
-  [filename] TEXT, 
-  [data] BLOB);
-CREATE INDEX [main].[AttachmentsIndex]
-ON [MessagesAttachments](
-  [id], 
-  [filename]);
+  [AttachmentID] INTEGER REFERENCES [Attachments]([id]) ON DELETE CASCADE, 
+  UNIQUE([MessageID], [AttachmentID]) ON CONFLICT IGNORE);
+CREATE INDEX [main].[MesagesAttachmentsIndex] ON [MessagesAttachments]([id]);
 
 /* Empty table [!CreationHistory] */
 DELETE FROM
   [main].[!CreationHistory];
 
-/* Table data [!CreationHistory] Record count: 6 */
+/* Table data [!CreationHistory] Record count: 9 */
 INSERT INTO [!CreationHistory]([rowid], [id], [Action], [Description]) VALUES(1, 1, 'Create this table', 'to show creation history');
 INSERT INTO [!CreationHistory]([rowid], [id], [Action], [Description]) VALUES(2, 2, 'Create table Messages', 'to save messages');
-INSERT INTO [!CreationHistory]([rowid], [id], [Action], [Description]) VALUES(3, 3, 'Create table MessagesAttachments', 'to save attachments for messages');
-INSERT INTO [!CreationHistory]([rowid], [id], [Action], [Description]) VALUES(4, 4, 'Create foreign key for Attachments', 'attachments for messages');
-INSERT INTO [!CreationHistory]([rowid], [id], [Action], [Description]) VALUES(5, 5, 'Create index for Messages', 'to accelerate select');
-INSERT INTO [!CreationHistory]([rowid], [id], [Action], [Description]) VALUES(6, 6, 'Create indes for attachments', 'to accelerate select');
+INSERT INTO [!CreationHistory]([rowid], [id], [Action], [Description]) VALUES(3, 3, 'Create table Attachments', 'to save attachments there');
+INSERT INTO [!CreationHistory]([rowid], [id], [Action], [Description]) VALUES(4, 4, 'Create table MessagesAttachments', 'to attach attachments for messages');
+INSERT INTO [!CreationHistory]([rowid], [id], [Action], [Description]) VALUES(5, 5, 'Create foreign key for Attachments', 'attachments for messages');
+INSERT INTO [!CreationHistory]([rowid], [id], [Action], [Description]) VALUES(6, 6, 'Create foreign key for Messages', 'messages for attachments');
+INSERT INTO [!CreationHistory]([rowid], [id], [Action], [Description]) VALUES(7, 7, 'Create index for Messages', 'to accelerate select');
+INSERT INTO [!CreationHistory]([rowid], [id], [Action], [Description]) VALUES(8, 8, 'Create indes for attachments', 'to accelerate select');
+INSERT INTO [!CreationHistory]([rowid], [id], [Action], [Description]) VALUES(9, 9, 'Create indes for MessagesAttachments', 'to accelerate select');
+
+/* Empty table [Attachments] */
+DELETE FROM
+  [main].[Attachments];
+
+/* Table data [Attachments] Record count: 0 */
 
 /* Empty table [Messages] */
 DELETE FROM
   [main].[Messages];
 
+/* Table data [Messages] Record count: 0 */
+
 /* Empty table [MessagesAttachments] */
 DELETE FROM
   [main].[MessagesAttachments];
+
+/* Table data [MessagesAttachments] Record count: 0 */
 
 /* Commit transaction */
 COMMIT;

@@ -1,5 +1,27 @@
-Display messages partially.
+Fix upload attachments, and rewrite database.
+
+feedback.sqlite3.sql - rewrite database. Now, here 3 tables. 
+PISDA.cs - Add Or to AddRow, to add row with INSERT OR (REPLACE/IGNORE). Add blob for ExecuteScalar, to run SQL select by blob with bytes.
+HTTPServer.cs - use captcha if specified in second arg.
+Compile.bat, Compile.sh - use capthca to run HTTPServer.exe
+HttpResponse.cs:
+	UseCaptcha - false, by default.
+	return binary response by /attachment/id, not a string.
+	rewrite main page of feedback-form.
+	add /upload - handler, to upload attachments (without captcha), and return rowid. Here is possible DDOS-attack, by large files, and maybe need captcha here, before uploading.
+	small fix else if, not it's second if.
+	return attachment from sqlite3 database.
+SQLite3Methods.cs:
+	Rewrite AddAttachment. Now it's public static int, and return rowid.
+	Add public static void LinkSpecifiedAttachment
+	Add public static void DeleteNotLinkedAttachments() to delete mistakely added attachments, which was been not related to any message.
+	rewrite AddMessage, now it's accept attached_files (param_value)
+	Link attachments according attached_files-values
+	line 355 - add log of request, but comment it.		//	PISDA.PISDA.Log("request: "+request);
+	delete unused code, and smallfixes;
+changes.txt - update this changes.
 ___________________________________________________
+
 Modify HttpResonse.cs and SQLite3Methods.cs
 to display messages
 

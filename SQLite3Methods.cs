@@ -107,7 +107,7 @@ namespace SQLite3
 		}
 		
 		//1.	Add file (if hash exists - generate anti-collision id, and re-compute hash).
-		public static void AddAttachment(int MessageID, string filename, string FileContent){
+		public static int AddAttachment(string filename, string FileContent){
 			//Console.WriteLine("FileContent");
 			//uint FileContentByteLength = (uint) FileContent.Length; //get ByteLength, [0 - 4,294,967,295] (4 bytes)
             //string hexByteLength = UintToHex(FileContentByteLength);
@@ -119,24 +119,46 @@ namespace SQLite3
 			
 			byte[] fileBytes = Convert.FromBase64String(base64);
 			
-			PISDA.PISDA.AddRow("MessagesAttachments", new object[]{null, MessageID.ToString(), filename, fileBytes}); //add or return existing hash
+			PISDA.PISDA.AddRow("Attachments", new object[]{null, filename, fileBytes}, 2); //insert or ignore
+			
+			string sql = @"
+SELECT [id]
+FROM [Attachments]
+WHERE
+		filename='"+filename+@"'
+	OR	data=@blob
+;
+";
+
+			return Convert.ToInt32(PISDA.PISDA.ExecuteScalar(sql, false, fileBytes));	//return rowid of attachment
 		}
 		
-		public static void AddAttachmentsForMessage(int MessageID, Dictionary<string, string> files){
-			foreach (KeyValuePair<string, string> keypair in files)  
-			{
-				string filename = keypair.Key;
-				string FileContent = keypair.Value;
-				AddAttachment(MessageID, filename, FileContent);
-			}
+		public static void LinkSpecifiedAttachment(int MessageID, int AttachmentRowid){
+			string sql = @"
+INSERT OR IGNORE INTO [MessagesAttachments] ([MessageID], [AttachmentID])
+VALUES(
+		"	+	MessageID			+	@"
+	,	"	+	AttachmentRowid		+	@"
+);
+";
+			PISDA.PISDA.ExecuteSQL(sql);
+		}
+		
+		public static void DeleteNotLinkedAttachments(){
+			string sql = @"DELETE FROM [Attachments]
+WHERE [id] NOT IN(
+	SELECT [AttachmentID] from [MessagesAttachments]
+);
+";
+			PISDA.PISDA.ExecuteSQL(sql);
 		}
 		
 		public static bool AddMessage(Dictionary<string, string> message){
 			string email		=	"";
 			string subject		=	"";
 			string messageText	=	"";
-			Dictionary<string, string> files = new Dictionary<string, string>();
-			
+			string attached_files = "";
+
 			foreach (KeyValuePair<string, string> keypair in message)  
 			{
 				//Console.WriteLine("Key: {0}, Value: {1}", keypair.Key, keypair.Value);
@@ -149,8 +171,10 @@ namespace SQLite3
 					subject = keypair.Value;
 				}
 				else if(key == "message"){
-					//messageText = latin1.GetString(utf8.GetBytes(message["message"])).Replace("'", "''");
 					messageText = (@message["message"]).Replace("'", "''");
+				}
+				else if(key == "attached_files"){
+					attached_files = message["attached_files"];
 				}
 				else if(
 					new string[]{
@@ -161,10 +185,8 @@ namespace SQLite3
 				){	//skip this values
 					continue;
 				}
-				else{
-					files[key] = keypair.Value;
-				}
 			}
+			
 			
 			string sql = @"
 INSERT OR REPLACE INTO [Messages] (email, subject, message)
@@ -179,24 +201,25 @@ VALUES(
 			try{
 				int	MessageID = PISDA.PISDA.ExecuteSQL(sql);
 				bool added = (MessageID > 0); //true or false
+				MessageID = Convert.ToInt32(PISDA.PISDA.ExecuteScalar("SELECT last_insert_rowid()"));
 				
-				/*
-				Console.WriteLine("files.Count: "+files.Count);
-				foreach (KeyValuePair<string, string> keypair in message)  
-				{
-					Console.WriteLine("key: "+keypair.Key+": value: "+keypair.Value);
-				}				
-				*/
-				
-				if(added && files.Count > 0){
-					MessageID = Convert.ToInt32(PISDA.PISDA.ExecuteScalar("SELECT MAX(id) FROM [Messages];"));
-				//	Console.WriteLine("MessageID: "+MessageID);
-					AddAttachmentsForMessage(MessageID, files);
-					Console.WriteLine("AddMessage: added: "+added);
-					return added;
-				}
-				else if(added){
-					return added;
+				if(added){
+					try{
+						if(attached_files != ""){
+							Dictionary<string, string> param_value = HttpServer.HttpRequest.GetParamValue(attached_files);
+							foreach (KeyValuePair<string, string> keypair in param_value){
+								int attachmentRowid = Convert.ToInt32(keypair.Value);
+								string filename = keypair.Key;
+								LinkSpecifiedAttachment(MessageID, attachmentRowid);
+							}
+							DeleteNotLinkedAttachments();
+						}
+						return added;
+					}
+					catch (Exception ex){
+						Console.WriteLine("SQLite3Methods.AddMessage: "+ex);
+						return false;
+					}
 				}
 				else{
 					return false;
@@ -207,14 +230,6 @@ VALUES(
 				return false;
 			}
 		}
-		
-/*
-		public static DataTable GetMessages(){
-			string sql = @"SELECT * FROM [Main].[Messages];";
-			DataTable result = PISDA.PISDA.GetDataTable(sql);
-			return result;
-		}
-*/
 
 		private static int messages_per_page = 100;
 		private static int MessagesCount = 0;
@@ -258,7 +273,7 @@ VALUES(
 		}
 
 		public static DataTable GetAttachments(){
-			string sql = @"SELECT * FROM [Main].[MessagesAttachments];";
+			string sql = @"SELECT * FROM [Main].[Attachments];";
 			DataTable result = PISDA.PISDA.GetDataTable(sql);
 			return result;
 		}
@@ -290,20 +305,18 @@ VALUES(
 		}
 
 		//public static object[] GetAttachment(string id){
-		public static byte[] GetAttachment(string id){
-			string sql = @"SELECT * FROM [Main].[MessagesAttachments] WHERE id="+id+";";
+		public static byte[] GetAttachment(string AttachmentID){
+			string sql = @"SELECT * FROM [Main].[Attachments] WHERE id="+AttachmentID+";";
 			DataRow attachment = PISDA.PISDA.ReturnDataRow(sql);
-
-		//	return new object[] {
-		//			attachment["filename"]	//string
-		//		,	attachment["data"]	//byte[]
-		//	};
-
 			return (byte[]) attachment["data"];
 		}
 		
-		public static DataTable GetAttachmentsForMessage(string id){
-			string sql = @"SELECT * FROM [Main].[MessagesAttachments] WHERE MessageID = "+id+";";
+		public static DataTable GetAttachmentsForMessage(string MessageID){
+			string sql = @"
+SELECT * FROM [Main].[MessagesAttachments]
+INNER JOIN [Attachments] on [Attachments].[id] = [MessagesAttachments].[AttachmentID]
+WHERE MessageID = "+MessageID+@"
+;";
 			DataTable result = PISDA.PISDA.GetDataTable(sql);
 			return result;
 		}
@@ -344,7 +357,7 @@ VALUES(
 							for(int i = attachments.Rows.Count-1; i>=0; i--){
 								DataRow attachment = attachments.Rows[i];
 								//string dataURL = "data:application/octet-stream;base64,"+Convert.ToBase64String((byte[])attachment["data"]);
-								string dataURL = "/attachment/"+attachment["id"];
+								string dataURL = "/attachment/"+attachment["AttachmentID"];
 								FeedBackForm += "<a href=\""+dataURL+"\" download=\""+attachment["filename"]+"\">"+attachment["filename"]+"</a><br>";
 							}
 						}

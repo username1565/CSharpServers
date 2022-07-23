@@ -8,6 +8,10 @@ set program=HTTPServer
 ::%csc% /main:HttpServer.HttpServer -reference:Mono.Data.Sqlite.dll /out:%program%.exe *.cs
 %csc% /main:HttpServer.HttpServer -reference:Mono.Data.Sqlite.dll -reference:Chaos.NaCl.dll /out:%program%.exe *.cs
 
-HTTPServer.exe 8082 captcha
+::	Without captcha
+HTTPServer.exe 8082
+
+::	With captcha
+::HTTPServer.exe 8082 captcha
 
 pause

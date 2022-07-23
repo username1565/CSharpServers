@@ -66,8 +66,8 @@ INSERT INTO [!CreationHistory]([rowid], [id], [Action], [Description]) VALUES(4,
 INSERT INTO [!CreationHistory]([rowid], [id], [Action], [Description]) VALUES(5, 5, 'Create foreign key for Attachments', 'attachments for messages');
 INSERT INTO [!CreationHistory]([rowid], [id], [Action], [Description]) VALUES(6, 6, 'Create foreign key for Messages', 'messages for attachments');
 INSERT INTO [!CreationHistory]([rowid], [id], [Action], [Description]) VALUES(7, 7, 'Create index for Messages', 'to accelerate select');
-INSERT INTO [!CreationHistory]([rowid], [id], [Action], [Description]) VALUES(8, 8, 'Create indes for attachments', 'to accelerate select');
-INSERT INTO [!CreationHistory]([rowid], [id], [Action], [Description]) VALUES(9, 9, 'Create indes for MessagesAttachments', 'to accelerate select');
+INSERT INTO [!CreationHistory]([rowid], [id], [Action], [Description]) VALUES(8, 8, 'Create index for attachments', 'to accelerate select');
+INSERT INTO [!CreationHistory]([rowid], [id], [Action], [Description]) VALUES(9, 9, 'Create index for MessagesAttachments', 'to accelerate select');
 
 /* Empty table [Attachments] */
 DELETE FROM

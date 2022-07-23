@@ -218,7 +218,7 @@ Message received!<br><br>"+
 					)
 			+@"
 			<br>
-			<button type=""submit"" form=""feedback_form"" value=""Submit"">Submit</button>
+			<button id=""submit"" type=""submit"" form=""feedback_form"" value=""Submit"">Submit</button>
 		</div>
 	</form>
 	"
@@ -232,6 +232,7 @@ Message received!<br><br>"+
 var feedback_form = document.getElementById('feedback_form');
 var attachments = document.getElementById('attachments');
 var attached_files = document.getElementById('attached_files');
+var submit = document.getElementById('submit');
 
 var busy = false;
 function upload(filename, dataURL)
@@ -243,6 +244,7 @@ function upload(filename, dataURL)
 	xhr.onload = function(){
         console.log(xhr.responseText);
 		busy = false;
+		submit.disabled = false;
 		var namefile = filename.split('\0').join('');
 		attached_files.value += ((attached_files.value === '') ? '' : '&' ) + ( namefile +'='+xhr.responseText.trim() ) ;	//rowid of added file
     };
@@ -251,6 +253,7 @@ function upload(filename, dataURL)
 
 function readFile(file, filename){
 	busy = true;
+	submit.disabled = true;
 	var reader = new FileReader();
 	reader.onload = function(e) {
 		for(var i = filename.length; i<256; i++){filename += '\0';}		//add padding with nulls, up to 256 chars
@@ -398,14 +401,45 @@ attachments.addEventListener(
 					string id = address.Split(new string[]{"/attachment/"}, StringSplitOptions.None)[1];
 				
 					//object[] b_response = SQLite3.SQLite3Methods.GetAttachment(id);
-					byte[] b_response = SQLite3.SQLite3Methods.GetAttachment(id);
-					Console.WriteLine("b_response.Length: "+b_response.Length);
-					builder.Append(AddHeader(true, b_response.Length));
-					sendBytes =	Combine(
+					object[] b_response = SQLite3.SQLite3Methods.GetAttachment(id);
+					if(b_response[0] == null && b_response[1] == null){
+						builder.Append(AddHeader()); //return as text
+						sendBytes =	Combine(
+												enc.GetBytes (builder.ToString ())	//header-bytes
+											,	enc.GetBytes("Attachment "+id+" not found")		//FileContent-bytes
+										)
+						;					
+					}else{
+						string filename		= (string)b_response[0];
+						byte[] FileContent	= (byte[]) b_response[1];
+				//		Console.WriteLine("b_response.Length: "+b_response.Length);
+					
+						Console.WriteLine("filename: "+filename);
+						if(filename.Contains(".txt"))	//if ".txt" - file
+						{
+							builder.Append(AddHeader()); //return as text
+						
+							//show text in tad "pre": <pre>TEXT</pre>
+							FileContent =	Combine(
+												enc.GetBytes("<pre title=\""+filename+"\">")
+											,	FileContent
+										);
+							FileContent =	Combine(
+												FileContent
+											,	enc.GetBytes("</pre>")
+										);
+						
+						}
+						else{
+							builder.Append(AddHeader(true, FileContent.Length)); //else, return as file
+						}
+					
+						sendBytes =	Combine(
 											enc.GetBytes (builder.ToString ())	//header-bytes
-										,	b_response							//FileContent-bytes
+										,	FileContent							//FileContent-bytes
 									)
 					;					
+					}
 				}
 				catch (Exception ex){
 					Console.WriteLine(ex);

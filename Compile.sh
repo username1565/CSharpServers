@@ -1,2 +1,7 @@
 csc /main:HttpServer.HttpServer -reference:Mono.Data.Sqlite.dll -reference:Chaos.NaCl.dll /out:HTTPServer.exe *.cs
-mono HTTPServer.exe 8082 captcha
+
+#	Without captcha
+mono HTTPServer.exe 8082
+
+#	With captcha
+#mono HTTPServer.exe 8082 captcha

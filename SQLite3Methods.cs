@@ -126,7 +126,7 @@ SELECT [id]
 FROM [Attachments]
 WHERE
 		filename='"+filename+@"'
-	OR	data=@blob
+	AND	data=@blob
 ;
 ";
 
@@ -305,10 +305,19 @@ VALUES(
 		}
 
 		//public static object[] GetAttachment(string id){
-		public static byte[] GetAttachment(string AttachmentID){
+		public static object[] GetAttachment(string AttachmentID){
 			string sql = @"SELECT * FROM [Main].[Attachments] WHERE id="+AttachmentID+";";
 			DataRow attachment = PISDA.PISDA.ReturnDataRow(sql);
-			return (byte[]) attachment["data"];
+			if(attachment == null){
+				return new object[]{null, null};
+			}
+			
+			object[] result = new object[] {
+						(string) attachment["filename"].ToString()		//filename
+					,	(byte[]) attachment["data"]						//FileContent
+				}
+			;
+			return result;
 		}
 		
 		public static DataTable GetAttachmentsForMessage(string MessageID){

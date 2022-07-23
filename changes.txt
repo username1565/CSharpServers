@@ -1,3 +1,19 @@
+Return text as text/html, in "pre"-tag, with filename in title of <pre title="filename">TEXT</pre>
+
+Compile.bat, Compile.sh - disable captcha, by default.
+
+SQLite3Methods.cs - fix condition on return id in AddAttachment.
+					rewrite GetAttachment to return filename too.
+
+HttpResponse.cs:
+	disable button "Submit", while file is loading, and enable this, after file loaded.
+	Rewrite else if(address.Contains(@"/attachment/")) to return .txt-files as "text/html"
+	return text-file in "pre"-tag, with filename in title of this.
+	
+feedback.sqlite.sql - smallfix: change "indes"-word to "index".
+
+changes.txt - update changes.
+___________________________________________________
 Fix upload attachments, and rewrite database.
 
 feedback.sqlite3.sql - rewrite database. Now, here 3 tables. 
@@ -21,7 +37,9 @@ SQLite3Methods.cs:
 	delete unused code, and smallfixes;
 changes.txt - update this changes.
 ___________________________________________________
-
+Display messages partially.
+___________________________________________________
+Display messages
 Modify HttpResonse.cs and SQLite3Methods.cs
 to display messages
 

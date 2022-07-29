@@ -12,18 +12,15 @@ namespace MulticastApp
         static int remotePort = 8001; // порт для отправки данных
         static int localPort = 8001; // локальный порт для прослушивания входящих подключений
         static string username; 
-        static void Main(string[] args) //remotport, MulticastGroupIP, localPort
+        static void Main(string[] args) //remotport (remote and local is the same), MulticastGroupIP
         {
             if(args.Length >= 1){
                 remotePort = System.Int32.Parse(args[0]);
+                localPort = remotePort;
             }
             if(args.Length >=2){
                 remoteAddress = IPAddress.Parse(args[1]);
-            }
-            if(args.Length >=3){
-                localPort = System.Int32.Parse(args[2]);
-            }
-         
+            }         
             try
             {
                 Console.Write("Введите свое имя:");

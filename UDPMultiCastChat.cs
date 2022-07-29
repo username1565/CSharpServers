@@ -18,7 +18,7 @@ namespace MulticastApp
                 remotePort = System.Int32.Parse(args[0]);
             }
             if(args.Length >=2){
-                remoteAddress = args[1];
+                remoteAddress = IPAddress.Parse(args[1]);
             }
             if(args.Length >=3){
                 localPort = System.Int32.Parse(args[2]);

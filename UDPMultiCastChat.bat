@@ -6,4 +6,4 @@ set program=UDPMultiCastChat
 
 %csc% /out:%program%.exe %program%.cs
 
-%program%.exe 8002 235.5.5.11 8003
+%program%.exe 8002 235.5.5.12

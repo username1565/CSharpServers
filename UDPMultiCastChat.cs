@@ -9,16 +9,26 @@ namespace MulticastApp
     class Program
     {
         static IPAddress remoteAddress; // хост для отправки данных
-        const int remotePort = 8001; // порт для отправки данных
-        const int localPort = 8001; // локальный порт для прослушивания входящих подключений
+        static int remotePort = 8001; // порт для отправки данных
+        static int localPort = 8001; // локальный порт для прослушивания входящих подключений
         static string username; 
-        static void Main(string[] args)
+        static void Main(string[] args) //remotport, MulticastGroupIP, localPort
         {
+            if(args.Length >= 1){
+                remotePort = System.Int32.Parse(args[0]);
+            }
+            if(args.Length >=2){
+                remoteAddress = args[1];
+            }
+            if(args.Length >=3){
+                localPort = System.Int32.Parse(args[2]);
+            }
+         
             try
             {
                 Console.Write("Введите свое имя:");
                 username = Console.ReadLine();
-                remoteAddress = IPAddress.Parse("235.5.5.11");
+                remoteAddress = (remoteAddress == null) ? IPAddress.Parse("235.5.5.11") : remoteAddress;
                 Thread receiveThread = new Thread(new ThreadStart(ReceiveMessage));
                 receiveThread.Start();
                 SendMessage(); // отправляем сообщение

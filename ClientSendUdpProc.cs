@@ -25,7 +25,7 @@ namespace UDP
 				IPEndPoint remoteEP = null;		//	IPEndPoint of incoming connection
 				byte[] ResponseBytes   = null;	//	response bytes
 				
-				Console.WriteLine("request: "+BinaryEncoding.GetString(RequestBytes));
+			//	Console.WriteLine("request: "+BinaryEncoding.GetString(RequestBytes));
 				if(udpClient.Client.MulticastLoopback == true){
 					IPEndPoint multicastEP = new IPEndPoint(IPAddress.Parse(MultiCastGroupIP), UdpServerPort);
 					udpClient.Send(RequestBytes, RequestBytes.Length, multicastEP);	//send to server's multicast EndPoint
@@ -42,7 +42,7 @@ namespace UDP
 				remoteEP = null; // IPEndPoint of incoming connection
 				ResponseBytes   = udpClient.Receive(ref remoteEP);
 				
-				Console.WriteLine("response: "+BinaryEncoding.GetString(ResponseBytes));
+			//	Console.WriteLine("response: "+BinaryEncoding.GetString(ResponseBytes));
 				return ResponseBytes;
 			}
 			catch (Exception ex){

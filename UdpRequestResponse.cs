@@ -14,7 +14,7 @@ namespace UDP
 		//get request-string from byte[] data
 		public static string Request(byte[] data, Encoding encoding){
 			string message = encoding.GetString(data);
-			Console.WriteLine("Request received: "+message);
+		//	Console.WriteLine("Request received: "+message);
 			return message;
 		}
 	
@@ -25,7 +25,7 @@ namespace UDP
 				return "Yes, I'm UDP server.";
 			}
 			string response = TextServer.Responses.Response(request);
-			Console.WriteLine("Response sent:"+response);
+		//	Console.WriteLine("Response sent:"+response);
 			return response;
 		}
 		
@@ -43,20 +43,22 @@ namespace UDP
 			IPEndPoint remoteEP = null;
 			byte[] buffer   = server.Receive(ref remoteEP);
 					
+		/*
 			Console.WriteLine(
 					"UDP Client connected: from "+Program.Convert.IP_PORT(remoteEP)
 				+	" to "	+Program.Convert.IP_PORT((IPEndPoint)((server.Client).LocalEndPoint))
 			);
+		*/
 
 			if (buffer != null && buffer.Length > 0)
 			{
 				string message = Request(buffer, encoding);
-				Console.WriteLine("UDP received: " + message);
+			//	Console.WriteLine("UDP received: " + message);
 				
 				//Send resonse for UDP-request
 				byte[] response = Response(message, encoding);
 				server.Send(response, response.Length, remoteEP.Address.ToString(), remoteEP.Port); // отправка
-				Console.WriteLine("UDP sent: " + encoding.GetString(response));
+			//	Console.WriteLine("UDP sent: " + encoding.GetString(response));
 			}
 		}
 	}

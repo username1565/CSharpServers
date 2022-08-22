@@ -31,7 +31,7 @@ namespace TCP
 				
 				//send RequestBytes
 				tcpStream.Write(RequestBytes, 0, RequestBytes.Length);
-				Console.WriteLine("Client sent: "+request);
+			//	Console.WriteLine("Client sent: "+request);
 
 				try{
 					byte[] data = new byte[64];
@@ -45,7 +45,7 @@ namespace TCP
 					while (tcpStream.DataAvailable && tcpClient.Connected);						
  
 					string response = builder.ToString();
-					Console.WriteLine("TCP Client received - " + response);
+			//		Console.WriteLine("TCP Client received - " + response);
 					
 
 				//	Do not close tcpStream, because server close connection with client, and do not listen stream, then.

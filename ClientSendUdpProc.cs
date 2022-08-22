@@ -21,11 +21,27 @@ namespace UDP
 		)
 		{
 			try{
-				Console.WriteLine("request: "+BinaryEncoding.GetString(RequestBytes));
-				udpClient.Send(RequestBytes, RequestBytes.Length);
+			
+				IPEndPoint remoteEP = null;		//	IPEndPoint of incoming connection
+				byte[] ResponseBytes   = null;	//	response bytes
 				
-				IPEndPoint remoteEP = null; //	IPEndPoint of incoming connection
-				byte[] ResponseBytes   = udpClient.Receive(ref remoteEP);
+				Console.WriteLine("request: "+BinaryEncoding.GetString(RequestBytes));
+				if(udpClient.Client.MulticastLoopback == true){
+					IPEndPoint multicastEP = new IPEndPoint(IPAddress.Parse(MultiCastGroupIP), UdpServerPort);
+					udpClient.Send(RequestBytes, RequestBytes.Length, multicastEP);	//send to server's multicast EndPoint
+
+					//skip first response
+					remoteEP = null; // IPEndPoint of incoming connection
+					ResponseBytes   = udpClient.Receive(ref remoteEP);
+				}
+				else{
+					udpClient.Send(RequestBytes, RequestBytes.Length);
+				}
+				
+				//and read second response...
+				remoteEP = null; // IPEndPoint of incoming connection
+				ResponseBytes   = udpClient.Receive(ref remoteEP);
+				
 				Console.WriteLine("response: "+BinaryEncoding.GetString(ResponseBytes));
 				return ResponseBytes;
 			}
@@ -69,7 +85,7 @@ namespace UDP
 			}
 		}
 
-		//From defined udpClient send in separate thread an UDP request as bytes, recive response from UDP-server, and return this as an obj-parameter - RequestBytes
+		//from defined udpClient send in separate thread an UDP request as bytes, and return ResponseBytes
 		private void SendUDPProc(object arg)
 		{
 		//	Console.WriteLine("UDP client thread started");
@@ -78,11 +94,6 @@ namespace UDP
 				object[] parameters = (object[])(arg);
 				byte[] RequestBytes = (byte[])(parameters[0]);
 				byte[] ResponseBytes = (byte[])(parameters[1]);
-
-				Console.WriteLine(
-						"UDP Client thread started: from "+Program.Convert.IP_PORT((IPEndPoint)(((UdpClient)udpClient).Client).LocalEndPoint)
-					+	" to "	+Program.Convert.IP_PORT((IPEndPoint)(((UdpClient)udpClient).Client).RemoteEndPoint)
-				);
 				
 				ResponseBytes = SendUDP(RequestBytes);
 				parameters[1] = ResponseBytes;

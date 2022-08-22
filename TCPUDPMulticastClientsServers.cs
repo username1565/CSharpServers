@@ -6,7 +6,7 @@ namespace Program
 {
 	partial class Program
 	{
-		static void Main(string[] args)
+		static void Main21(string[] args)
 		{		
 			string	TcpUdpServerIP = "127.0.0.1";
 			int		TcpUdpServerPort = 8081;

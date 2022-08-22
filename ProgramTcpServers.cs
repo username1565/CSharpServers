@@ -4,8 +4,8 @@ namespace Program
 {
 	partial class Program
 	{
-		//start one TCP-server, on different ports
-		static void Main1(string[] args)
+		//start few TCP-servers, on different ports
+		static void Main(string[] args)
 		{
 			string IP = "0.0.0.0";
 			int port = 8081;
@@ -16,10 +16,11 @@ namespace Program
 			else if(args.Length == 2){
 				IP = args[0];
 				port = System.Int32.Parse(args[1]);
-			}
+			}		
 		
 			try{
 				TCP.Server.Start(new string[]{IP, port.ToString()});
+				TCP.Server.Start(new string[]{IP, (++port).ToString()});
 			}
 			catch (Exception ex)
 			{

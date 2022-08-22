@@ -104,13 +104,13 @@ namespace Peer
 				//		Start UDP clients
 	//			UDP.Client udpClient2 = new UDP.Client(ServerUdpIP, ServerUdpPort, UDPMultiCastGroupIP);
 
-				UDP.Client udpClient = new UDP.Client(IP, port, UDPMultiCastGroupIP);
+				UDP.Client udpClient = new UDP.Client("127.0.0.1", port, UDPMultiCastGroupIP);
 				response = udpClient.Send("test");
 			//	udpClient.Send(new byte[]{0,1,2,3,4,5});
 				Console.WriteLine(response == "TEST");
 				
 
-				UDP.Client udpClient2 = new UDP.Client(IP, port, UDPMultiCastGroupIP);
+				UDP.Client udpClient2 = new UDP.Client("127.0.0.1", port, UDPMultiCastGroupIP);
 				response = udpClient2.Send("test2");
 			//	udpClient2.Send(new byte[]{0,1,2,3,4,5});
 				Console.WriteLine(response == "TEST2");

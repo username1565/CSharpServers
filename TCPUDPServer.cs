@@ -4,7 +4,7 @@ namespace TCPUDP
 {
 	class Server
 	{
-		public static void Main(string[] args){
+		public static void Main19(string[] args){
 			string TcpIP;
 			string UdpIP;
 			int TcpPort = 0;

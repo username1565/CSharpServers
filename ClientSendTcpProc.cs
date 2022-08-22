@@ -60,5 +60,42 @@ namespace TCP
 					return null;
 				}
 		}
+
+		//Do this in separate threads
+		private static void SendTCPProc(
+				object arg
+		)
+		{
+			try
+			{
+				object[] parameters = (object[])arg;
+				
+				TcpClient tcpClient = (TcpClient)parameters[0];
+				string request = (string)parameters[1];
+				string response = (string)parameters[2];
+				Encoding encoding = (Encoding)parameters[3];
+				encoding = (encoding != null) ? encoding : Encoding.ASCII;
+				
+			//	Console.WriteLine("TCP Client thread started");
+			//	Console.WriteLine(
+			//			"TCP Client thread started: from "+Program.Convert.IP_PORT((IPEndPoint)(tcpClient.Client.LocalEndPoint))
+			//		+	" to "	+Program.Convert.IP_PORT((IPEndPoint)(tcpClient.Client.RemoteEndPoint))
+			//	);
+				
+				response = SendTCP(tcpClient, request, encoding);
+				parameters[2] = response;
+			}
+			catch (SocketException ex)
+			{
+				if (ex.ErrorCode != 10004) // unexpected
+					Console.WriteLine("TCPClientProc exception: " + ex);
+			}
+			catch (Exception ex)
+			{
+				Console.WriteLine("TCPClientProc exception: " + ex);
+			}
+
+		//	Console.WriteLine("TCP client thread finished");
+		}
 	}
 }

@@ -15,6 +15,9 @@ namespace TextServer
 			if(server.ContainsKey(request)){
 				response = server[request];
 			}
+			else if(request.Contains("Peer Exchange")){
+				response = Peer.PEX_server.PeerExchange(request);
+			}
 			else{
 				// return this request, as an UPPER-cased text.
 				response = request.Trim().ToUpper();

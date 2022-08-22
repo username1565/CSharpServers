@@ -5,7 +5,7 @@ namespace Program
 {
 	partial class Program
 	{
-		static void Main(string[] args)
+		static void Main15(string[] args)
 		{
 			string	ServerTcpIP		=	"127.0.0.1"		;
 			int		ServerTcpPort	=	8081			;

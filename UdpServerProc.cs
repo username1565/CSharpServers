@@ -26,12 +26,17 @@ namespace UDP
 	{
 		private static void UDPServerProc(object arg)
 		{
-			Console.WriteLine("UDP server thread started: "+Program.Convert.IP_PORT((IPEndPoint)(((UdpClient)arg).Client).LocalEndPoint));
+			object[]	parameters			=	(object[])arg;
+			UdpClient	server				=	(UdpClient) (parameters[0]);
+			string		MultiCastGroupIP	=	(string)	(parameters[1]);
+		
+			Console.WriteLine(
+				"UDP server thread started: "+Program.Convert.IP_PORT((IPEndPoint)((server.Client).LocalEndPoint))
+				+ ( (server.Client.MulticastLoopback == true) ? " with multicast group IP " + MultiCastGroupIP : "" )
+			);
 
 			try
 			{
-				UdpClient server = (UdpClient)arg;
-
 				for(;;)
 				{
 					UDP.Server.RequestResonse(server, Encoding.ASCII);

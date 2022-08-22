@@ -1,10 +1,10 @@
-### Peer, written on CSharp (C#)
+# Peer, written on CSharp (C#)
 
 ### Compile
-Windows: `Peer.bat`
-Linux (requires [mono](https://www.mono-project.com/docs/getting-started/install/linux/)): `./Peer.sh`
++ Windows: `Peer.bat`
++ Linux (requires [mono](https://www.mono-project.com/docs/getting-started/install/linux/)): `./Peer.sh`
 
-### Peer
+# Peer
 [Decentralized networks](https://en.wikipedia.org/wiki/Peer-to-peer) constains peers.
 Peer - it's server and client together.
 # TCP-peer

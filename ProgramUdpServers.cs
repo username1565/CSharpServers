@@ -9,6 +9,8 @@ namespace Program
 		{
 			string IP = "0.0.0.0";
 			int port = 8081;
+			string MultiCastGroupIP = null;
+			
 			if(args.Length == 1){
 				port = System.Int32.Parse(args[0]);
 			}
@@ -16,10 +18,16 @@ namespace Program
 				IP = args[0];
 				port = System.Int32.Parse(args[1]);
 			}
+			else if(args.Length == 3){
+				IP = args[0];
+				port = System.Int32.Parse(args[1]);
+				MultiCastGroupIP = args[2];
+			}
 		
 			try{
-				UDP.Server.Start(new string[]{IP, port.ToString()});
-				UDP.Server.Start(new string[]{IP, (port+1).ToString()});
+				//Start few UDP-server with MultiCast group
+				UDP.Server.Start(IP, port, "235.5.5.11");
+				UDP.Server.Start(IP, port+1, "235.5.5.12");
 			}
 			catch (Exception ex)
 			{

@@ -27,7 +27,7 @@ namespace TCP
 		)
 		{
 			try{
-				TcpClient		tcpClient = new TcpClient(IP, port);
+				TcpClient		tcpClient = Connect(IP, port);
 				encoding = (encoding != null) ? encoding : Encoding.ASCII;
 				string response = SendTCP(tcpClient, request, encoding);
 				tcpClient.Close();
@@ -48,7 +48,7 @@ namespace TCP
 		)
 		{
 			try{
-				TcpClient		tcpClient = new TcpClient(IP, port);
+				TcpClient		tcpClient = Connect(IP, port);
 				encoding = (encoding != null) ? encoding : Encoding.ASCII;
 				string		request			=	encoding.GetString(RequestBytes)			;
 				string		response		=	SendTCP(tcpClient, request, encoding)		;
@@ -65,16 +65,43 @@ namespace TCP
 		//Connect to TCP server, and return TcpClient
 		
 		//string, int
-		public static TcpClient Connect(string TcpIP, int TcpPort){
+		public static TcpClient Connect(
+				string TcpIP
+			,	int TcpPort
+			,	int ConnectionTimeout = 1	//seconds
+		){
 			TcpClient tcpClient = null;
 			try
 			{
-				tcpClient = new TcpClient(TcpIP, TcpPort);	//start this on IP:PORT
-			//	tcpClient = new TcpClient();
-			//	tcpClient.Connect(TcpIP, TcpPort)
+				tcpClient = new TcpClient();	//start this on IP:PORT
+
+				//inactive node connection timeout.
+				IAsyncResult ar = tcpClient.BeginConnect(TcpIP, TcpPort, null, null);  
+				System.Threading.WaitHandle wh = ar.AsyncWaitHandle;
+				try 
+				{
+					if (!ar.AsyncWaitHandle.WaitOne(TimeSpan.FromSeconds(ConnectionTimeout), false))  
+					{  
+						tcpClient.Close();  
+						throw new TimeoutException();  
+					}
+					tcpClient.EndConnect(ar);  
+				}
+				catch //(Exception ex)
+				{
+					//Console.WriteLine(ex);
+				//	Console.WriteLine(TcpIP+":"+TcpPort+" not respond within "+ConnectionTimeout + " seconds...");
+					wh.Close();
+					return null;
+				}
+				finally 
+				{
+					wh.Close();
+				}
 			}
 			catch (Exception ex){
 				Console.WriteLine(ex);
+				return null;
 			}
 			return tcpClient;
 		}
@@ -96,12 +123,12 @@ namespace TCP
 
 		//From specified TcpClient, send string, receive response string from server, and return this response-string.
 		public static string Send(
-				TcpClient	tcpClient
+				TcpClient	tcpClient = null
 			,	string request = null
 			,	Encoding encoding = null
 		)
 		{
-			if(request == null){ return ""; }
+			if(request == null || tcpClient == null){ return null; }
 
 			encoding					=	(encoding != null) ? encoding : BinaryEncoding	;
 
@@ -126,19 +153,21 @@ namespace TCP
 				response = (string)parameters[2];
 				return response;
 			}
-			catch (Exception ex){
-				Console.WriteLine(ex);
+			catch //(Exception ex)
+			{
+			//	Console.WriteLine(ex);
 				return null;
 			}
 		}
 		
 		//From specified TcpClient, send bytes, receive response bytes, and return this ResponseBytes.
 		public static byte[] Send(
-				TcpClient	tcpClient
-			,	byte[]		RequestBytes
+				TcpClient	tcpClient = null
+			,	byte[]		RequestBytes = null
 			,	Encoding	encoding = null
 		)
 		{
+			if(RequestBytes == null || tcpClient == null){ return null; }
 			encoding					=	(encoding != null) ? encoding : BinaryEncoding	;
 		
 			string		request			=	encoding.GetString(RequestBytes)			;

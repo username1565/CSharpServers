@@ -27,6 +27,8 @@ namespace UDP
 			}
 		
 			//Start UDP-client
+		//	UdpClient udpServer = UDPServer(UdpServerIP.ToString(), UdpServerPort);
+
 			UdpClient udpServer = new UdpClient();
 			IPEndPoint ep = new IPEndPoint(UdpServerIP, UdpServerPort); // endpoint where server is listening (testing localy)
 			udpServer.Client.Bind(ep);

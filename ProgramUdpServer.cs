@@ -9,7 +9,7 @@ namespace Program
 		{
 			string IP = "0.0.0.0";
 			int port = 8081;
-			string MultiCastGroupIP = null;
+			string MultiCastGroupIP = "235.5.5.11";
 			
 			if(args.Length == 1){
 				port = System.Int32.Parse(args[0]);
@@ -25,8 +25,11 @@ namespace Program
 			}
 		
 			try{
-				//Start one UDP-server with MultiCast group
-				UDP.Server.Start(IP, port, MultiCastGroupIP);
+				//Start one UDP-server with multicast:
+				UDP.Server.Start(new string[]{IP, port.ToString(), MultiCastGroupIP});
+			
+				//Start one UDP-server without multicast:
+				UDP.Server.Start(new string[]{IP, (port+1).ToString()});
 			}
 			catch (Exception ex)
 			{

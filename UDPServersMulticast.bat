@@ -7,9 +7,9 @@ set program=UDPServersMulticast
 %csc% /out:%program%.exe *.cs
 
 ::	UDP server without multicast group
-::%program%.exe 0.0.0.0 8081
+%program%.exe 0.0.0.0 8081
 
 ::	UDP server with mulcicast group IP
-%program%.exe 127.0.0.1 8081 235.5.5.11
+%program%.exe 0.0.0.0 8081 235.5.5.11
 
 pause

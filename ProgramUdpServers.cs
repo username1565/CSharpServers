@@ -26,8 +26,11 @@ namespace Program
 		
 			try{
 				//Start few UDP-server with MultiCast group
-				UDP.Server.Start(IP, port, "235.5.5.11");
-				UDP.Server.Start(IP, port+1, "235.5.5.12");
+				UDP.Server.Start(IP, port);
+				UDP.Server.Start(IP, port+1);
+				
+				UDP.Server.Start("0.0.0.0", port+2, "235.5.5.11");
+				UDP.Server.Start("0.0.0.0", port+3, "235.5.5.12");
 			}
 			catch (Exception ex)
 			{

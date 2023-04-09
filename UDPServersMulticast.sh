@@ -3,4 +3,4 @@ csc /out:UDPServersMulticast.exe *.cs
 mono UDPServersMulticast.exe 0.0.0.0 8081
 
 #	UDP server with mulcicast group IP
-mono UDPServersMulticast.exe 127.0.0.1 8081 235.5.5.11
+mono UDPServersMulticast.exe 0.0.0.0 8081 235.5.5.11

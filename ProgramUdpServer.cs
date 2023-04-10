@@ -5,7 +5,7 @@ namespace Program
 	partial class Program
 	{
 		//start one UDP-server
-		static void Main9(string[] args)
+		static void Main(string[] args)
 		{
 			string IP = "0.0.0.0";
 			int port = 8081;

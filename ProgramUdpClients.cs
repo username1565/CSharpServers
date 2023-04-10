@@ -26,13 +26,20 @@ namespace Program
 			}
 
 			try{
-	//			UDP.Client udpClient2 = new UDP.Client(ServerUdpIP, ServerUdpPort+1, MultiCastGroupIP);
+				UDP.Client.Send("127.0.0.1", ServerUdpPort, "test", System.Text.Encoding.ASCII);
+				UDP.Client.Send("127.0.0.1", ServerUdpPort, new byte[]{0,1,2,3,4,5});
+				
+				UDP.Client.Send("127.0.0.1", ServerUdpPort+1, "test", System.Text.Encoding.ASCII);
+				UDP.Client.Send("127.0.0.1", ServerUdpPort+1, new byte[]{0,1,2,3,4,5});
+				
+				UDP.Client.Send("0.0.0.0", ServerUdpPort+2, "test", System.Text.Encoding.ASCII, "235.5.5.11");
+				UDP.Client.Send("0.0.0.0", ServerUdpPort+2, new byte[]{0,1,2,3,4,5}, "235.5.5.11");
 
-				UDP.Client udpClient = new UDP.Client(ServerUdpIP, ServerUdpPort, "235.5.5.11");
+				UDP.Client udpClient = new UDP.Client("0.0.0.0", ServerUdpPort+3, "235.5.5.12");
 				udpClient.Send("test");
 				udpClient.Send(new byte[]{0,1,2,3,4,5});
 
-				UDP.Client udpClient2 = new UDP.Client(ServerUdpIP, ServerUdpPort+1, "235.5.5.12");
+				UDP.Client udpClient2 = new UDP.Client("0.0.0.0", ServerUdpPort+3, "235.5.5.12");
 				udpClient2.Send("test");
 				udpClient2.Send(new byte[]{0,1,2,3,4,5});
 			}

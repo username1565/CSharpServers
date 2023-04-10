@@ -28,7 +28,10 @@ namespace UDP
 			udpClient = new UdpClient();
 			try
 			{
-				if(UdpServerIP == "127.0.0.1" || SetMultiCastGroupIP == null){
+				if(UdpServerIP == "0.0.0.0"){
+					MultiCastGroupIP = SetMultiCastGroupIP;
+				}
+				else if(UdpServerIP == "127.0.0.1" || SetMultiCastGroupIP == null){
 					udpClient.Client.MulticastLoopback = false;
 					udpClient.Connect(UdpServerIP, UdpServerPort);	//Connect this to IP:PORT
 				}else{

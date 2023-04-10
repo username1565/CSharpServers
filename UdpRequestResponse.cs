@@ -32,14 +32,14 @@ namespace UDP
 			return encoding.GetBytes(Response(request));
 		}
 
-		public static void RequestResonse(
+		public static void RequestResponse(
 				UdpClient server
 			,	Encoding encoding
 		)
 		{
 			IPEndPoint remoteEP = null;
 			byte[] buffer   = server.Receive(ref remoteEP);
-					
+			
 			Console.WriteLine(
 					"UDP Client connected: from "+Program.Convert.IP_PORT(remoteEP)
 				+	" to "	+Program.Convert.IP_PORT((IPEndPoint)((server.Client).LocalEndPoint))

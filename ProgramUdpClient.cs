@@ -26,11 +26,21 @@ namespace Program
 			}
 
 			try{
+				//Clients with multicast
+				UDP.Client.Send("0.0.0.0", ServerUdpPort, "test", System.Text.Encoding.ASCII, MultiCastGroupIP);
+				UDP.Client.Send("0.0.0.0", ServerUdpPort, new byte[]{0,1,2,3,4,5}, MultiCastGroupIP);
+
+				UDP.Client udpClient = new UDP.Client("0.0.0.0", ServerUdpPort, MultiCastGroupIP);
+				udpClient.Send("test");
+				udpClient.Send(new byte[]{0,1,2,3,4,5});
+				
+				//Client without multicast:
 				UDP.Client.Send(ServerUdpIP, ServerUdpPort, "test");
 				UDP.Client.Send(ServerUdpIP, ServerUdpPort, new byte[]{0,1,2,3,4,5});
-//				UDP.Client udpClient = new UDP.Client(ServerUdpIP, ServerUdpPort, MultiCastGroupIP);
-//				udpClient.Send("test");
-//				udpClient.Send(new byte[]{0,1,2,3,4,5});
+
+				UDP.Client udpClient2 = new UDP.Client(ServerUdpIP, ServerUdpPort, MultiCastGroupIP);
+				udpClient2.Send("test");
+				udpClient2.Send(new byte[]{0,1,2,3,4,5});				
 			}
 			catch(Exception ex){
 				Console.WriteLine(ex);

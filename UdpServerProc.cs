@@ -39,7 +39,7 @@ namespace UDP
 			{
 				for(;;)
 				{
-					UDP.Server.RequestResonse(server, Encoding.ASCII);
+					UDP.Server.RequestResponse(server, Encoding.ASCII);
 				}
 			}
 			catch (SocketException ex)

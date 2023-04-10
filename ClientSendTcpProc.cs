@@ -22,6 +22,12 @@ namespace TCP
 			,	Encoding		encoding = null
 		)
 		{
+			try{
+				if (tcpClient == null || tcpClient.Connected == false)
+				{
+					throw new Exception("Failed to connect.");
+				}
+
 				encoding					=	(encoding != null) ? encoding : BinaryEncoding	;
 				
 				//Get client's NetworkStream
@@ -46,7 +52,6 @@ namespace TCP
  
 					string response = builder.ToString();
 					Console.WriteLine("TCP Client received - " + response);
-					
 
 				//	Do not close tcpStream, because server close connection with client, and do not listen stream, then.
 				//		tcpStream.Close();
@@ -55,10 +60,17 @@ namespace TCP
 						
 						return response;
 				}
-				catch (Exception ex){
+				catch (Exception ex)
+				{
 					Console.WriteLine(ex);
 					return null;
 				}
+			}
+			catch (Exception ex)
+			{
+				Console.WriteLine(ex);
+				return null;
+			}				
 		}
 
 		//Do this in separate threads

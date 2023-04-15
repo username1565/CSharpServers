@@ -108,6 +108,26 @@ namespace Peer
 				udpClient2.Send("test");
 				udpClient2.Send(new byte[]{0,1,2,3,4,5});
 				
+
+
+
+				//	Try connect TCP addnodes:
+				AliveNodes.GetAliveNodes();	//Alive nodes in AliveNodes.AliveAddnodeList
+				AliveNodes.ConnectAliveNodes();	//Connect to alive nodes;
+				
+
+				//	Show active connections:
+				//		TCP:
+				Console.WriteLine("TCP.Client.TCPConnectionsList.Count: "+TCP.Client.TCPConnectionsList.Count);
+				//		UDP:
+				Console.WriteLine("UDP.Client.UDPConnectionsList.Count: "+UDP.Client.UDPConnectionsList.Count);
+				
+				
+				//	Test connections:
+				AliveNodes.TestConnections();
+				
+				
+				
 			}
 			catch(Exception ex){
 				Console.WriteLine(ex);

@@ -5,6 +5,8 @@ using System.Collections.Generic;						//Dictionary
 using System.Runtime.Serialization.Formatters.Binary;	//BinaryFormatter
 using System.Linq;										//Dictionary keys to List<string>
 //using System.Uri;										//Uri.EscapeDataString(String), Uri.UnescapeDataString(String)
+using System.Collections;								//Hashtable
+using Storage;	//KeyValue hashtable
 
 namespace DHT
 {
@@ -12,18 +14,14 @@ namespace DHT
 	{
 		public static Encoding encoding = Encoding.GetEncoding("ISO-8859-1");	//binary encoding, to save bytes.
 	
-		//Hash table is key-value dictionary
-		public static Dictionary<string, string> HashTable = new Dictionary<string, string>(){
-		//	{"key", "value"}
-			{"key", "value"}
-		};
-		
+		public static KeyValue hashtable = new KeyValue();
+
 		public static int Count(){
-			return DHT.HashTable.Count;
+			return hashtable.Count();
 		}
 
 		public static List<string> KeysList(){
-			return HashTable.Keys.ToList();
+			return hashtable.Keys();
 		}
 		
 		public static string ListTostring(List<string> list){
@@ -35,7 +33,7 @@ namespace DHT
 		public static List<string> NewKeys(string keysstring){
 			List<string> keys = keysstring.Split(';').ToList();
 			for(int i = 0; i<keys.Count; i++){
-				if(HashTable.ContainsKey(keys[i])){
+				if(hashtable.ContainsKey(keys[i])){
 					keys.Remove(keys[i]);
 				}
 			}
@@ -49,47 +47,66 @@ namespace DHT
 			return keys;
 		}
 		
-		public static string DictionaryTostring(Dictionary < string, string > dictionary)
-		{
-			string dictionarystring = "{";
-			foreach(KeyValuePair < string, string > keyValues in dictionary)
-			{
-				dictionarystring += System.Uri.EscapeDataString(keyValues.Key) + ":" + System.Uri.EscapeDataString(keyValues.Value) + ",";
-			}
-			return dictionarystring.TrimEnd(',', ' ') + "}";
+		public static string Encode(string str){
+			return System.Uri.EscapeDataString(str);
 		}
 		
-		public static Dictionary<string, string> DictionaryFromString( string dictionarystring )
+		public static string Decode(string str){
+			return System.Uri.UnescapeDataString(str);
+		}
+
+		//Convert Hashtable to string
+		public static string HashtableToString( Hashtable hashtable , bool show = false)
 		{
-			Dictionary<string, string> dictionary = new Dictionary<string, string>();
-			
-			dictionarystring = dictionarystring.Substring(1, dictionarystring.Length-1);
-			string[] keyvalues = dictionarystring.Split(',');
-			for(int i = 0; i<keyvalues.Length; i++){
-				string[] key_value = keyvalues[i].Split(':');
-				string key = System.Uri.EscapeDataString(key_value[0]);
-				string value = System.Uri.EscapeDataString(key_value[1]);
-				dictionary[key] = value;
+			string HashtableString = "";
+			foreach(DictionaryEntry keyValues in hashtable)
+			{
+				string line = Encode((string)keyValues.Key) + ":" + Encode((string)keyValues.Value) + "\n";
+				HashtableString += line;
+				if(show == true){
+					Console.WriteLine(line);
+				}
 			}
-			return dictionary;
+			return HashtableString.TrimEnd('\n', ' ');
+		}
+
+		//Convert Hashtable from string
+		public static Hashtable HashtableFromString( string HashtableString )
+		{
+			Hashtable hashtable = new Hashtable();
+			if(string.IsNullOrEmpty(HashtableString)){
+				return hashtable;
+			}
+			string[] keyvalues = HashtableString.Split('\n');
+			if(keyvalues.Length>0){
+				for(int i = 0; i<keyvalues.Length; i++){
+					string[] key_value = keyvalues[i].Split(':');
+					if(key_value.Length>=2){
+						string key = Decode(key_value[0]);
+						string value = Decode(key_value[1]);
+						hashtable.Add(key, value);
+					}
+				}
+			}
+			return hashtable;
 		}
 
 		public static string GetDataByKeys(string keys){
 			List<string> Keys = keys.Split(';').ToList();
-			Dictionary <string, string> data = new Dictionary<string, string>();
+			Hashtable data = new Hashtable();
 			foreach(string key in Keys){
-				if(HashTable.ContainsKey(key)){
-					data[key] = HashTable[key];
+				if(hashtable.ContainsKey(key)){
+					data[key] = hashtable.GetValue(key);
 				}
 			}
-			return DictionaryTostring(data);
+			return HashtableToString(data);
 		}
 		
 		public static string GetDataFromstring(string data_string){
-			Dictionary <string, string> data = DictionaryFromString(data_string);
-			foreach(KeyValuePair <string, string> record in data){
-				if(!HashTable.ContainsKey(record.Key)){
-					HashTable[record.Key] = record.Value;
+			Hashtable data = HashtableFromString(data_string);
+			foreach(DictionaryEntry record in data){
+				if(!hashtable.ContainsKey((string)record.Key)){
+					hashtable.Add((string)record.Key, (string)record.Value, true);
 				}
 			}
 			Console.WriteLine("DHT synchronized. DHT.Count()"+DHT.Count());
@@ -251,7 +268,8 @@ namespace DHT
 					
 					keysNum = DHT.Count();
 					string NextRequest = SyncDHT();
-					DHT.HashTable["key2"] = "value2";
+					//DHT.HashTable["key2"] = "value2";
+					DHT.hashtable.Add("key2", "value2");
 					string response_string = "";
 					do{
 						Console.WriteLine("NextRequest: "+NextRequest);

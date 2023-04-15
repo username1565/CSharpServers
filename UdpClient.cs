@@ -29,6 +29,9 @@ namespace UDP
 			try
 			{
 				if(UdpServerIP == "0.0.0.0"){
+					if(SetMultiCastGroupIP == null){
+						SetMultiCastGroupIP = "235.5.5.11";
+					}
 					MultiCastGroupIP = SetMultiCastGroupIP;
 				}
 				else if(UdpServerIP == "127.0.0.1" || SetMultiCastGroupIP == null){
@@ -92,6 +95,10 @@ namespace UDP
 				byte[] RequestBytes = encoding.GetBytes(request);
 				byte[] ResponseBytes = null;
 				ResponseBytes = Send(RequestBytes);
+				if(ResponseBytes==null){
+					Console.WriteLine("ResponseBytes is null, return null");
+					return null;
+				};
 				string response = encoding.GetString(ResponseBytes);
 				return response;
 			}

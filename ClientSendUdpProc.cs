@@ -21,61 +21,13 @@ namespace UDP
 		)
 		{
 			try{
-			
 				Console.WriteLine("request: "+BinaryEncoding.GetString(RequestBytes));
-
-				IPEndPoint remoteEP = null;		//	IPEndPoint of incoming connection
-				byte[] ResponseBytes   = null;	//	response bytes
-				string response = "";
+				udpClient.Send(RequestBytes, RequestBytes.Length);
 				
-				//if multicast-client
-				if(udpClient.Client.MulticastLoopback == true){
-					//send multicast-request, and receive many responses:
-					IPEndPoint multicastEP = new IPEndPoint(IPAddress.Parse(MultiCastGroupIP), UdpServerPort);
-					udpClient.Send(RequestBytes, RequestBytes.Length, multicastEP);	//send to server's multicast EndPoint
-					
-					//Receive responses:
-					//Multicast Client can receive many resposes, from different interfaces.
-					//set Timeout to receive responses
-					udpClient.Client.ReceiveTimeout = 20;
-					bool receiving = true;
-					while(receiving){
-						try{
-							remoteEP = null; // IPEndPoint of incoming connection
-							ResponseBytes   = udpClient.Receive(ref remoteEP);
-							response = BinaryEncoding.GetString(ResponseBytes);
-
-						//	Console.WriteLine("receiving response: "+response);
-							//and work with the current response
-						}
-						catch{	//if no any response, within ReceiveTimeout
-							receiving = false;
-						}
-					}
-					Console.WriteLine("response: "+response);
-					return ResponseBytes;	//return last response
-				}
-				else{ //if UDP-client without multicast:
-					
-					//set timeout to receive response:
-					udpClient.Client.ReceiveTimeout = 5000;
-				
-					//just send UDP-request
-					udpClient.Send(RequestBytes, RequestBytes.Length);
-
-					try{
-						//and receive response
-						remoteEP = null; // IPEndPoint of incoming connection
-						ResponseBytes   = udpClient.Receive(ref remoteEP);
-						response = BinaryEncoding.GetString(ResponseBytes);
-						//	Console.WriteLine("receiving response: "+response);
-							//and work with the current response
-					}
-					catch{
-					}
-					Console.WriteLine("response: "+response);
-					return ResponseBytes;
-				}
+				IPEndPoint remoteEP = null; //	IPEndPoint of incoming connection
+				byte[] ResponseBytes   = udpClient.Receive(ref remoteEP);
+				Console.WriteLine("response: "+BinaryEncoding.GetString(ResponseBytes));
+				return ResponseBytes;
 			}
 			catch (Exception ex){
 				Console.WriteLine(ex);
@@ -117,7 +69,7 @@ namespace UDP
 			}
 		}
 
-		//from defined udpClient send in separate thread an UDP request as bytes, and return ResponseBytes
+		//From defined udpClient send in separate thread an UDP request as bytes, recive response from UDP-server, and return this as an obj-parameter - RequestBytes
 		private void SendUDPProc(object arg)
 		{
 		//	Console.WriteLine("UDP client thread started");
@@ -126,6 +78,11 @@ namespace UDP
 				object[] parameters = (object[])(arg);
 				byte[] RequestBytes = (byte[])(parameters[0]);
 				byte[] ResponseBytes = (byte[])(parameters[1]);
+
+				Console.WriteLine(
+						"UDP Client thread started: from "+Program.Convert.IP_PORT((IPEndPoint)(((UdpClient)udpClient).Client).LocalEndPoint)
+					+	" to "	+Program.Convert.IP_PORT((IPEndPoint)(((UdpClient)udpClient).Client).RemoteEndPoint)
+				);
 				
 				ResponseBytes = SendUDP(RequestBytes);
 				parameters[1] = ResponseBytes;

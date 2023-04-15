@@ -12,35 +12,19 @@ namespace UDP
 {
 	partial class Client
 	{
-		public	UdpClient	udpClient			=	null	;
-		public	string		UdpServerIP			=	null	;
-		public	int			UdpServerPort		=	0		;
-		public	string		MultiCastGroupIP	=	null	;
+		public	UdpClient	udpClient		=	null	;
+		public	string		UdpServerIP		=	null	;
+		public	int			UdpServerPort	=	0		;
 
 		public Client(
 				string			UseUdpServerIP
 			,	int				UseUdpServerPort
-			,	string			SetMultiCastGroupIP = null
 		)
 		{
 			UdpServerIP = UseUdpServerIP;
 			UdpServerPort = UseUdpServerPort;
-			udpClient = new UdpClient();
-			try
-			{
-				if(UdpServerIP == "0.0.0.0"){
-					MultiCastGroupIP = SetMultiCastGroupIP;
-				}
-				else if(UdpServerIP == "127.0.0.1" || SetMultiCastGroupIP == null){
-					udpClient.Client.MulticastLoopback = false;
-					udpClient.Connect(UdpServerIP, UdpServerPort);	//Connect this to IP:PORT
-				}else{
-					MultiCastGroupIP = SetMultiCastGroupIP;
-				}
-			}
-			catch (Exception ex){
-				Console.WriteLine(ex);
-			}
+			udpClient = new UdpClient();					//create new UdpClient
+			udpClient.Connect(UdpServerIP, UdpServerPort);	//Connect this to IP:PORT			
 		}
 
 		//Client
@@ -92,6 +76,10 @@ namespace UDP
 				byte[] RequestBytes = encoding.GetBytes(request);
 				byte[] ResponseBytes = null;
 				ResponseBytes = Send(RequestBytes);
+				if(ResponseBytes==null){
+					Console.WriteLine("ResponseBytes is null, return null");
+					return null;
+				};
 				string response = encoding.GetString(ResponseBytes);
 				return response;
 			}
@@ -106,10 +94,9 @@ namespace UDP
 				string			IP
 			,	int				port
 			,	byte[]			RequestBytes
-			,	string			MultiCastGroupIP = null
 		)
 		{
-			UDP.Client udpClient = new Client(IP, port, MultiCastGroupIP);	//create new UdpClient
+			UDP.Client udpClient = new Client(IP, port);	//create new UdpClient
 			return udpClient.Send(RequestBytes);			//and send bytes for this
 		}		
 
@@ -119,10 +106,9 @@ namespace UDP
 			,	int				port
 			,	string			request = null
 			,	Encoding		encoding = null
-			,	string			MultiCastGroupIP = null
 		)
 		{
-			UDP.Client udpClient = new Client(IP, port, MultiCastGroupIP);	//create new UdpClient
+			UDP.Client udpClient = new Client(IP, port);	//create new UdpClient
 			encoding = (encoding != null) ? encoding : Encoding.ASCII;
 			return udpClient.Send(request, encoding);		//and send string for this
 		}

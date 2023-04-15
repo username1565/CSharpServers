@@ -134,6 +134,26 @@ namespace Peer
 //			//Run interval for local peer discovery
 			LocalPeersDiscovery.RunDiscoveryPeersInterval(5);
 			
+			
+			
+			
+				//	Check peers, before run PEX
+			IsPeer.CheckPeers();
+		//	Console.WriteLine("IsPeer.TCPPeers.Count: "+IsPeer.TCPPeers.Count);
+		//	Console.WriteLine("IsPeer.UDPPeers.Count: "+IsPeer.UDPPeers.Count);
+			
+			
+				//	Run Peer Exchange:
+			//	TCP:
+		//	LocalPeersList.TryConnectPeersTCP();
+			Console.WriteLine("Try TCP PEX");
+			PEX_client.TCPPeerExchange();
+		
+			//	UDP:
+			Console.WriteLine("Try UDP PEX");
+		//	LocalPeersList.TryConnectPeersUDP();
+			PEX_client.UDPPeerExchange();
+
 				
 				
 			}

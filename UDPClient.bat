@@ -6,7 +6,10 @@ set program=UdpClient
 
 %csc% /out:%program%.exe *.cs
 
-::Test connection to UDP server
-%program%.exe 127.0.0.1 8081
+::UDP
+::%program%.exe 127.0.0.1 8081
+
+::UDP Multicast - response not receiving...
+%program%.exe 0.0.0.0 8081 235.5.5.11
 
 pause

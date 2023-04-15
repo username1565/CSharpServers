@@ -12,19 +12,38 @@ namespace UDP
 {
 	partial class Client
 	{
-		public	UdpClient	udpClient		=	null	;
-		public	string		UdpServerIP		=	null	;
-		public	int			UdpServerPort	=	0		;
+		public	UdpClient	udpClient			=	null	;
+		public	string		UdpServerIP			=	null	;
+		public	int			UdpServerPort		=	0		;
+		public	string		MultiCastGroupIP	=	null	;
 
 		public Client(
 				string			UseUdpServerIP
 			,	int				UseUdpServerPort
+			,	string			SetMultiCastGroupIP = null
 		)
 		{
 			UdpServerIP = UseUdpServerIP;
 			UdpServerPort = UseUdpServerPort;
-			udpClient = new UdpClient();					//create new UdpClient
-			udpClient.Connect(UdpServerIP, UdpServerPort);	//Connect this to IP:PORT			
+			udpClient = new UdpClient();
+			try
+			{
+				if(UdpServerIP == "0.0.0.0"){
+					if(SetMultiCastGroupIP == null){
+						SetMultiCastGroupIP = "235.5.5.11";
+					}
+					MultiCastGroupIP = SetMultiCastGroupIP;
+				}
+				else if(UdpServerIP == "127.0.0.1" || SetMultiCastGroupIP == null){
+					udpClient.Client.MulticastLoopback = false;
+					udpClient.Connect(UdpServerIP, UdpServerPort);	//Connect this to IP:PORT
+				}else{
+					MultiCastGroupIP = SetMultiCastGroupIP;
+				}
+			}
+			catch (Exception ex){
+				Console.WriteLine(ex);
+			}
 		}
 
 		//Client
@@ -94,9 +113,10 @@ namespace UDP
 				string			IP
 			,	int				port
 			,	byte[]			RequestBytes
+			,	string			MultiCastGroupIP = null
 		)
 		{
-			UDP.Client udpClient = new Client(IP, port);	//create new UdpClient
+			UDP.Client udpClient = new Client(IP, port, MultiCastGroupIP);	//create new UdpClient
 			return udpClient.Send(RequestBytes);			//and send bytes for this
 		}		
 
@@ -106,9 +126,10 @@ namespace UDP
 			,	int				port
 			,	string			request = null
 			,	Encoding		encoding = null
+			,	string			MultiCastGroupIP = null
 		)
 		{
-			UDP.Client udpClient = new Client(IP, port);	//create new UdpClient
+			UDP.Client udpClient = new Client(IP, port, MultiCastGroupIP);	//create new UdpClient
 			encoding = (encoding != null) ? encoding : Encoding.ASCII;
 			return udpClient.Send(request, encoding);		//and send string for this
 		}

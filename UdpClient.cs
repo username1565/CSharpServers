@@ -76,6 +76,10 @@ namespace UDP
 				byte[] RequestBytes = encoding.GetBytes(request);
 				byte[] ResponseBytes = null;
 				ResponseBytes = Send(RequestBytes);
+				if(ResponseBytes==null){
+					Console.WriteLine("ResponseBytes is null, return null");
+					return null;
+				};
 				string response = encoding.GetString(ResponseBytes);
 				return response;
 			}

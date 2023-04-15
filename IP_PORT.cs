@@ -27,5 +27,15 @@ namespace Program
 			int			port	=	(int)(IPPORT[1]);
 			return new object[]{IP, port};			//IPAddress, int
 		}
+
+		public static string IP_PORT(string IP, int PORT)
+		{
+			return IP+":"+PORT.ToString();				//string "IP:PORT"
+		}
+
+		public static string IP_PORT(IPAddress IP, int PORT)
+		{
+			return IP.ToString()+":"+PORT.ToString();	//string "IP:PORT"
+		}
 	}
 }

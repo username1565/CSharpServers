@@ -92,6 +92,13 @@ namespace Peer
 			}
 			return AlivePeer;
 		}
+
+		public static int CheckPeer(string IPPORT){
+			object[]	ipPORT	=	Program.Convert.IP_PORT(IPPORT)			;
+			string		IP		=	(string)	ipPORT[0]	;
+			int			port	=	(int)		ipPORT[1]	;
+			return CheckPeer(IP, port);
+		}
 		
 		//	Another case to check TCP/UDP servers:
 		//is TCP server or not? true/false

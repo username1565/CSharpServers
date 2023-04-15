@@ -126,6 +126,14 @@ namespace Peer
 				//	Test connections:
 				AliveNodes.TestConnections();
 				
+			
+			//Run LDP (Local Peer Discovery)
+			LocalPeersDiscovery.DiscoveryPeers();
+			IsPeer.ShowActivePeers();
+
+//			//Run interval for local peer discovery
+			LocalPeersDiscovery.RunDiscoveryPeersInterval(5);
+			
 				
 				
 			}

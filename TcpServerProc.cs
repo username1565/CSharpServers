@@ -76,12 +76,12 @@ namespace TCP
 				
 					//Read TCP-request
 					tcpRequest = TCP.Server.Request(stream, encoding);
-					Console.WriteLine("TCP request: " + tcpRequest);
+				//	Console.WriteLine("TCP request: " + tcpRequest);
 					
 					//Write TCP-response
 					tcpResponse = TCP.Server.Response(tcpRequest, encoding);	//else get response bytes
 					stream.Write(tcpResponse, 0, tcpResponse.Length);			//write this
-					Console.WriteLine("TCP response: " + encoding.GetString(tcpResponse));			//show this
+				//	Console.WriteLine("TCP response: " + encoding.GetString(tcpResponse));			//show this
 				}
 				//on error
 				catch{
@@ -89,9 +89,9 @@ namespace TCP
 				}
 			}
 			closeClient:
-				Console.WriteLine("Close NetworkStream...");
+			//	Console.WriteLine("Close NetworkStream...");
 				stream.Close();	//Close NetworkStream
-				Console.WriteLine("Close client...");
+			//	Console.WriteLine("Close client...");
 				client.Close();	//close client in the end of thread
 		}
 	

@@ -18,6 +18,10 @@ namespace TextServer
 			else if(request.Contains("Peer Exchange")){
 				response = Peer.PEX_server.PeerExchange(request);
 			}
+			else if(request.StartsWith("DHT synchronization. "))
+			{
+				return DHT.DHT_server.SyncDHT(request);
+			}
 			else{
 				// return this request, as an UPPER-cased text.
 				response = request.Trim().ToUpper();

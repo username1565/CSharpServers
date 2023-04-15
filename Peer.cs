@@ -155,6 +155,14 @@ namespace Peer
 			PEX_client.UDPPeerExchange();
 
 				
+				//	Check peers, before run DHT-sync
+				IsPeer.CheckPeers();
+				//	Sync DHT
+				//	TCP:
+				DHT.DHT_client.TCPSyncDHT();
+
+				//	UDP:
+				DHT.DHT_client.UDPSyncDHT();
 				
 			}
 			catch(Exception ex){

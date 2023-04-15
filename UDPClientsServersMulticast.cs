@@ -1,31 +1,38 @@
 using System;
-using System.Net;
-using System.Net.Sockets;
 
 namespace Program
 {
 	partial class Program
 	{
-		static void Main12(string[] args)
-		{		
-			string ServerUdpIP = "127.0.0.1";
+		//start one UDP-server
+		static void Main(string[] args)
+		{
+			string IP = "0.0.0.0";
 			int ServerUdpPort = 8081;
-			string MultiCastGroupIP = "235.5.5.11";
-
+			string MultiCastGroupIP = null;
+			
 			if(args.Length == 1){
 				ServerUdpPort = System.Int32.Parse(args[0]);
 			}
-			if(args.Length == 2){
-				ServerUdpIP = args[0];
+			else if(args.Length == 2){
+				IP = args[0];
 				ServerUdpPort = System.Int32.Parse(args[1]);
 			}
-			if(args.Length == 3){
-				ServerUdpIP = args[0];
+			else if(args.Length == 3){
+				IP = args[0];
 				ServerUdpPort = System.Int32.Parse(args[1]);
 				MultiCastGroupIP = args[2];
 			}
-
+		
 			try{
+				//Start few UDP-server with/out MultiCast group
+				UDP.Server.Start(IP, ServerUdpPort);
+				UDP.Server.Start(IP, ServerUdpPort+1);
+				
+				UDP.Server.Start("0.0.0.0", ServerUdpPort+2, "235.5.5.11");
+				UDP.Server.Start("0.0.0.0", ServerUdpPort+3, "235.5.5.12");
+
+				//Start few UDPClients with/out MultiCast group
 				UDP.Client.Send("127.0.0.1", ServerUdpPort, "test", System.Text.Encoding.ASCII);
 				UDP.Client.Send("127.0.0.1", ServerUdpPort, new byte[]{0,1,2,3,4,5});
 				
@@ -42,11 +49,18 @@ namespace Program
 				UDP.Client udpClient2 = new UDP.Client("0.0.0.0", ServerUdpPort+3, "235.5.5.12");
 				udpClient2.Send("test");
 				udpClient2.Send(new byte[]{0,1,2,3,4,5});
+				
+				//UDP Without Multicast
+				UDP.Client udpClient3 = new UDP.Client("127.0.0.1", ServerUdpPort);
+				udpClient3.Send("test");
+				udpClient3.Send(new byte[]{0,1,2,3,4,5});
 			}
-			catch(Exception ex){
+			catch (Exception ex)
+			{
 				Console.WriteLine(ex);
 			}
-			System.Console.ReadLine();
+			
+			Console.ReadLine();
 		}
 	}
 }

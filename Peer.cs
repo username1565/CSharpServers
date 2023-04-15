@@ -75,10 +75,14 @@ namespace Peer
 				Console.WriteLine("\n\n" +	"Start servers: ");
 				//Start TCP Server
 				TCP.Server.Start(new string[]{IP, port.ToString()});
+				
+				UDP.Server.Start(IP, port, UDPMultiCastGroupIP);	//UDP-Server with UDPMultiCastGroupIP				
 
 				//Start UDP Server
-				UDP.Server.Start(IP, port, UDPMultiCastGroupIP);	//UDP-Server with UDPMultiCastGroupIP
-				System.Threading.Thread.Sleep(1500);
+			//	UDP.Client.UDPMulticastServer = UDP.Server.UDPServer(null, port, UDPMultiCastGroupIP);	//UDP-Server with UDPMultiCastGroupIP
+			//	UDP.Client.UDPMulticastServer = UDP.Server.UDPServer(IP, port, UDPMultiCastGroupIP);	//UDP-Server with UDPMultiCastGroupIP
+				System.Threading.Thread.Sleep(500);
+			//	Console.WriteLine("UDP.Client.UDPMulticastServer: "+UDP.Client.UDPMulticastServer);
 
 
 
@@ -104,14 +108,27 @@ namespace Peer
 				//		Start UDP clients
 	//			UDP.Client udpClient2 = new UDP.Client(ServerUdpIP, ServerUdpPort, UDPMultiCastGroupIP);
 
-				UDP.Client udpClient = new UDP.Client("127.0.0.1", port, UDPMultiCastGroupIP);
+				UDP.Client udpClient = new UDP.Client("127.0.0.1", port);
 				response = udpClient.Send("test");
 			//	udpClient.Send(new byte[]{0,1,2,3,4,5});
 				Console.WriteLine(response == "TEST");
 				
 
-				UDP.Client udpClient2 = new UDP.Client("127.0.0.1", port, UDPMultiCastGroupIP);
+				UDP.Client udpClient2 = new UDP.Client("127.0.0.1", port);
 				response = udpClient2.Send("test2");
+			//	udpClient2.Send(new byte[]{0,1,2,3,4,5});
+				Console.WriteLine(response == "TEST2");
+
+
+				Console.WriteLine("\n\n" +	"Test UDP Multicast: ");
+				UDP.Client udpClient3 = new UDP.Client("127.0.0.1", port, UDPMultiCastGroupIP);
+				response = udpClient3.Send("test");
+			//	udpClient.Send(new byte[]{0,1,2,3,4,5});
+				Console.WriteLine(response == "TEST");
+				
+
+				UDP.Client udpClient4 = new UDP.Client("127.0.0.1", port, UDPMultiCastGroupIP);
+				response = udpClient4.Send("test2");
 			//	udpClient2.Send(new byte[]{0,1,2,3,4,5});
 				Console.WriteLine(response == "TEST2");
 				

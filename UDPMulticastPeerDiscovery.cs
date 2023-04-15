@@ -15,7 +15,9 @@ namespace UDP
 		
 	
 		//Local Peers Discovery over UDP multicast request
-		public static void UDPMulticastPeersDiscovery()
+		public static void UDPMulticastPeersDiscovery(
+			int ReceiveTimeout = 500
+		)
 		{
 			string UdpIP = "0.0.0.0";
 			int UdpPort = 8081;
@@ -30,31 +32,48 @@ namespace UDP
 			buffer = Encoding.ASCII.GetBytes("Local Peer Discovery, using UDP-MultiCast");	//send this
 			udpClient.Send(buffer, buffer.Length, endPoint);
 		
-			//receive response
+			//Receive responses:
 			IPEndPoint remoteEP = null; // IPEndPoint of incoming connection
-			buffer   = udpClient.Receive(ref remoteEP);
+			string response = "";
 
-			//if sommebody respond
-			if (buffer != null && buffer.Length > 0)
-			{
-				//Console.WriteLine("remoteEP.Address.ToString(): "+remoteEP.Address.ToString());
-				string remoteIP = remoteEP.Address.ToString();	//get IP
-				string peer = (remoteIP+":"+UdpPort);			//and join with port to IP:PORT
-				
-				//add peer to PeersList
-				Console.WriteLine("UDP.Client.UDPMulticastPeersDiscovery()."); //Encoding.ASCII.GetString(buffer));
-				Console.WriteLine("Client received Multicast: " + peer);
-				if(!Peer.IsPeer.Peers.Contains(peer))
-				{
-					Peer.IsPeer.CheckPeer(peer);	//add peer in PeersList;
-					Console.WriteLine("Add alive peer. Peer.IsPeer.Peers.Count: "+Peer.IsPeer.Peers.Count);
+			//Multicast Client can receive many resposes, from different interfaces.
+			//set Timeout to receive responses
+			udpClient.Client.ReceiveTimeout = ReceiveTimeout;
+			bool receiving = true;
+			while(receiving){
+				try{
+					remoteEP = null; // IPEndPoint of incoming connection
+					buffer   = udpClient.Receive(ref remoteEP);
+
+					//if sommebody respond
+					if (buffer != null && buffer.Length > 0)
+					{
+						response = udpClient_.BinaryEncoding.GetString(buffer);
+					//	Console.WriteLine("receiving response: "+response);
+						//and work with the current response
+						if(response == "Local Peer Discovery, using UDP-MultiCast".ToUpper()){
+							string peer = remoteEP.ToString();
+							Console.WriteLine("UDP.Client.UDPMulticastPeersDiscovery(). Client received Multicast from " + peer);
+
+							//add peer to PeersList
+							if(!Peer.IsPeer.Peers.Contains(peer))
+							{
+								Peer.IsPeer.CheckPeer(peer);	//add peer in PeersList;
+								Console.WriteLine("Add alive peer. Peer.IsPeer.Peers.Count: "+Peer.IsPeer.Peers.Count);
+							}
+						}
+					}
+				}
+				catch{	//if no any response, within ReceiveTimeout
+					receiving = false;
 				}
 			}
-			//peers in Peer.LocalPeersList.PeersList
 			
-			//	if(udpClient != null)
-			//		udpClient.Close();
-
+			if(udpClient != null)
+			{
+				udpClient.Close();
+			}
+			//peers in Peer.LocalPeersList.PeersList
 		}
 	}
 }

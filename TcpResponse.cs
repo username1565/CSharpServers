@@ -14,9 +14,10 @@ namespace TCP
 	{
 		public static string Response(string message)
 		{
-			// return this as upper-cased text.
-			message = message.Trim().ToUpper();
-			return message;
+			if(message == "Are you TCP server?"){
+				return "Yes, I'm TCP server.";
+			}
+			return TextServer.Responses.Response(message);
 		}
 		
 		public static byte[] Response(	

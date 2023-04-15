@@ -21,7 +21,10 @@ namespace UDP
 		//Response as string
 		public static string Response(string request)
 		{
-			string response = request;
+			if(request == "Are you UDP server?"){
+				return "Yes, I'm UDP server.";
+			}
+			string response = TextServer.Responses.Response(request);
 			Console.WriteLine("Response sent:"+response);
 			return response;
 		}

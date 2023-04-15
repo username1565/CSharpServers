@@ -72,96 +72,114 @@ namespace Peer
 
 			try{
 				//	Raise server-side - TCP/UDP-server with UDP-MultiCastGroupIP
+				Console.WriteLine("\n\n" +	"Start servers: ");
 				//Start TCP Server
 				TCP.Server.Start(new string[]{IP, port.ToString()});
 
 				//Start UDP Server
 				UDP.Server.Start(IP, port, UDPMultiCastGroupIP);	//UDP-Server with UDPMultiCastGroupIP
-				
+				System.Threading.Thread.Sleep(1500);
 
 
 
-				Console.WriteLine("Test TCP: ");
+				Console.WriteLine("\n\n" +	"Test TCP clients: ");
 				//		Start TCP clients
 				string response;
-				byte[] ResponseBytes;
+			//	byte[] ResponseBytes;
+			
 				//	Connect, send request, receive response, then disconnect
 				response				=	TCP.Client.Send("127.0.0.1", port, "send and close");
-				ResponseBytes			=	TCP.Client.Send("127.0.0.1", port, new byte[]{0,1,2,3,4,5});
+			//	ResponseBytes			=	TCP.Client.Send("127.0.0.1", port, new byte[]{0,1,2,3,4,5});
+				Console.WriteLine(response == "SEND AND CLOSE");
 			
 				//	Connect tcpClient, and keep connection alive
 				TcpClient tcpClient 	=	TCP.Client.Connect("127.0.0.1", port);
 				//	Send requests using connected tcpClient, and receive responses
-				response				=	TCP.Client.Send(tcpClient, "test");
-				ResponseBytes			=	TCP.Client.Send(tcpClient, new byte[]{0,1,2,3,4,5});
+				response				=	TCP.Client.Send(tcpClient, "test2");
+			//	ResponseBytes			=	TCP.Client.Send(tcpClient, new byte[]{0,1,2,3,4,5});
+				Console.WriteLine(response == "TEST2");
 
-				Console.WriteLine("Test UDP: ");
-
+				
+				Console.WriteLine("\n\n" +	"Test UDP clients: ");
 				//		Start UDP clients
 	//			UDP.Client udpClient2 = new UDP.Client(ServerUdpIP, ServerUdpPort, UDPMultiCastGroupIP);
 
 				UDP.Client udpClient = new UDP.Client(IP, port, UDPMultiCastGroupIP);
-				udpClient.Send("test");
-				udpClient.Send(new byte[]{0,1,2,3,4,5});
+				response = udpClient.Send("test");
+			//	udpClient.Send(new byte[]{0,1,2,3,4,5});
+				Console.WriteLine(response == "TEST");
+				
 
 				UDP.Client udpClient2 = new UDP.Client(IP, port, UDPMultiCastGroupIP);
-				udpClient2.Send("test");
-				udpClient2.Send(new byte[]{0,1,2,3,4,5});
+				response = udpClient2.Send("test2");
+			//	udpClient2.Send(new byte[]{0,1,2,3,4,5});
+				Console.WriteLine(response == "TEST2");
 				
 
 
-
+				Console.WriteLine("\n\n" +	"Check alive nodes from known TCP-addnodes (addnodes.txt): ");
 				//	Try connect TCP addnodes:
-				AliveNodes.GetAliveNodes();	//Alive nodes in AliveNodes.AliveAddnodeList
-				AliveNodes.ConnectAliveNodes();	//Connect to alive nodes;
-				
+				HashSet<string> KnownAddnodes = Addnode.ReadAddNodes();
+				HashSet<string> AliveAddnodes = AliveNodes.GetAliveNodes(KnownAddnodes);	//Alive nodes in AliveNodes.AliveAddnodeList
 
-				//	Show active connections:
+				Console.WriteLine("\n\n" +	"Try connect alive nodes: ");
+				AliveNodes.ConnectAliveNodes();	//Connect to alive nodes;
+
+				Console.WriteLine("\n\n" +	"Show active connections: ");
+				//	Show active connections: 
 				//		TCP:
 				Console.WriteLine("TCP.Client.TCPConnectionsList.Count: "+TCP.Client.TCPConnectionsList.Count);
 				//		UDP:
 				Console.WriteLine("UDP.Client.UDPConnectionsList.Count: "+UDP.Client.UDPConnectionsList.Count);
 				
 				
+				Console.WriteLine("\n\n" +	"Test connections: ");
 				//	Test connections:
 				AliveNodes.TestConnections();
 				
 			
-			//Run LDP (Local Peer Discovery)
-			LocalPeersDiscovery.DiscoveryPeers();
-			IsPeer.ShowActivePeers();
 
-//			//Run interval for local peer discovery
-			LocalPeersDiscovery.RunDiscoveryPeersInterval(5);
+				Console.WriteLine("\n\n" +	"Run LDP (Local Peer Discovery): ");
+				//Run LDP (Local Peer Discovery)
+				LocalPeersDiscovery.DiscoveryPeers();
+				IsPeer.ShowActivePeers();
+
+				Console.WriteLine("\n\n" +	"Run interval for LDP (Local Peer Discovery)... ");
+//				//Run interval for LDP (Local Peer Discovery)
+				LocalPeersDiscovery.RunDiscoveryPeersInterval(5);	//seconds
 			
 			
 			
 			
+			//	Console.WriteLine("\n\n" +	"Check peers, before run PEX: ");
 				//	Check peers, before run PEX
-			IsPeer.CheckPeers();
-		//	Console.WriteLine("IsPeer.TCPPeers.Count: "+IsPeer.TCPPeers.Count);
-		//	Console.WriteLine("IsPeer.UDPPeers.Count: "+IsPeer.UDPPeers.Count);
+			//	IsPeer.CheckPeers();
+			//	Console.WriteLine("IsPeer.TCPPeers.Count: "+IsPeer.TCPPeers.Count);
+			//	Console.WriteLine("IsPeer.UDPPeers.Count: "+IsPeer.UDPPeers.Count);
 			
 			
 				//	Run Peer Exchange:
 			//	TCP:
 		//	LocalPeersList.TryConnectPeersTCP();
-			Console.WriteLine("Try TCP PEX");
+			Console.WriteLine("\n\n" +	"Try TCP PEX");
 			PEX_client.TCPPeerExchange();
 		
 			//	UDP:
-			Console.WriteLine("Try UDP PEX");
+			Console.WriteLine("\n\n" +	"Try UDP PEX");
 		//	LocalPeersList.TryConnectPeersUDP();
 			PEX_client.UDPPeerExchange();
 
 				
+			//	Console.WriteLine("\n\n" +	"Check peers, before run DHT-sync: ");
 				//	Check peers, before run DHT-sync
-				IsPeer.CheckPeers();
-				//	Sync DHT
-				//	TCP:
+			//	IsPeer.CheckPeers();
+
+				Console.WriteLine("\n\n" +	"Sync DHT TCP: ");
+				//	Sync DHT TCP:
 				DHT.DHT_client.TCPSyncDHT();
 
-				//	UDP:
+				Console.WriteLine("\n\n" +	"Sync DHT UDP: ");
+				//	Sync DHT UDP:
 				DHT.DHT_client.UDPSyncDHT();
 				
 			}

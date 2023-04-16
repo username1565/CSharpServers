@@ -14,7 +14,7 @@ namespace DHT
 	{
 		public static Encoding encoding = Encoding.GetEncoding("ISO-8859-1");	//binary encoding, to save bytes.
 	
-		public static KeyValue hashtable = new KeyValue();
+		public static KeyValue hashtable = new KeyValue("Hashtable.db3");
 
 		public static int Count(){
 			return hashtable.Count();

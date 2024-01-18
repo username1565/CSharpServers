@@ -12,13 +12,13 @@ namespace Peer
 	*/
 	public class Addnode
 	{
-		public static HashSet<string> AddnodeList = new HashSet<string>(){		//HashSet known peers (nodes)
-			"127.0.0.1:8081"
-		};
-		
 		public static string addnodesFile = "addnodes.txt";
 		
 		public static int DefaultPort = 8081;
+		
+		public static HashSet<string> AddnodeList = new HashSet<string>(){		//HashSet known peers (nodes)
+			"127.0.0.1:"+DefaultPort
+		};
 		
 		public static HashSet<string> ReadAddNodes()
 		{
@@ -38,14 +38,16 @@ namespace Peer
 					
 					//check port
 					string[] IP_PORT = node.Split(':');
-					if(IP_PORT.Length == 1){
-						//IP only, add default port
+					if(IP_PORT.Length == 1){	//if IP only
+						//add default port
+						//node is IP_PORT
 						node = IP_PORT[0]+":"+DefaultPort.ToString();
 					}
+					AddnodeList.Add(node);	//and add node to the list.
 					
-					//node is IP_PORT
-					
-					AddnodeList.Add(node);
+					if(IP_PORT[1] != DefaultPort.ToString()){	//if port is not default
+						AddnodeList.Add(IP_PORT[0]+":"+DefaultPort.ToString());	//Add this node with default port, too.
+					}
 				}
 			}
 			Console.WriteLine("Peer.Addnode.AddnodeList.Count: "+Addnode.AddnodeList.Count);
@@ -55,6 +57,7 @@ namespace Peer
 		
 		public static void SaveAddNodes()
 		{
+			if(AddnodeList.Count == 0){return;}
 			string Addnodes = "";
 			foreach(string node in AddnodeList){
 				Addnodes += "addnode="+node+"\n";
@@ -68,13 +71,7 @@ namespace Peer
 			foreach(string node in AliveAddnodeList){
 				AddnodeList.Add(node);
 			}
-
-			string Addnodes = "";
-			foreach(string node in AddnodeList){
-				Addnodes += "addnode="+node+"\n";
-			}
-			Addnodes = Addnodes.Substring(0, Addnodes.Length-1);
-			File.WriteAllText(addnodesFile, Addnodes);
+			SaveAddNodes();
 		}		
 	}
 	

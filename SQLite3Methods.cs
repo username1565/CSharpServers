@@ -34,6 +34,11 @@ namespace Storage
 
 		public static bool UseSQLite3 = true;
 		
+		//Define this from arguments.
+		public static string KeyValueTableName = null;
+		public static string KeyName = null;
+		public static string ValueName = null;
+
 		public static void openSQLite3Db(string DbFile)
 		{
 			//set db-filename, create if does not exists, and open connection with this db, after create file.
@@ -129,7 +134,7 @@ Reset()
 */		
 		//Count
 		public static int Count(){
-			string sql = "SELECT COUNT(*) from [main].[KeyValue];";
+			string sql = "SELECT COUNT(*) from [main].["+KeyValueTableName+"];";
 			object result = PISDA.PISDA.ExecuteScalar(sql);
 			return System.Int32.Parse(ToStr(result));
 		}
@@ -137,26 +142,26 @@ Reset()
 /*
 		//Keys
 		public static DataTable Keys(){
-			string sql = "SELECT key from [main].[KeyValue];";
+			string sql = "SELECT "+KeyName+" from [main].["+KeyValueTableName+"];";
 			DataTable result = PISDA.PISDA.GetDataTable(sql);
 			return result;
 		}
 */
 
 		public static List<string> Keys(){
-			string sql = "SELECT key from [main].[KeyValue];";
+			string sql = "SELECT "+KeyName+" from [main].["+KeyValueTableName+"];";
 			DataTable sqlresult = PISDA.PISDA.GetDataTable(sql);
 
 			List<string> result = new List<string>();
 			foreach(DataRow row in sqlresult.Rows){
-				result.Add((string)row["key"]);
+				result.Add((string)row[KeyName]);
 			}
 			return result;
 		}
 		
 		//ContainsKey
 		public static bool ContainsKey(string key){
-			string sql = "SELECT COUNT(*) from [main].[KeyValue] WHERE key = '"+key+"';";
+			string sql = "SELECT COUNT(*) from [main].["+KeyValueTableName+"] WHERE "+KeyName+"='"+key+"';";
 			object result = PISDA.PISDA.ExecuteScalar(sql);
 			return (System.Int32.Parse(ToStr(result)) > 0);
 		}
@@ -168,7 +173,7 @@ Reset()
 		
 		//Get value
 		public static string GetValue(string key){
-			string sql = "SELECT value from [main].[KeyValue] WHERE key = '"+key+"';";
+			string sql = "SELECT "+ValueName+@" from [main].["+KeyValueTableName+"] WHERE "+KeyName+"= '"+key+"';";
 			object result = PISDA.PISDA.ExecuteScalar(sql);
 			return ToStr(result);
 		}
@@ -189,12 +194,12 @@ Reset()
 		{
 			SetCaseSensetiveLikeIfNeed();
 			
-			string sql = @"SELECT * FROM [main].[KeyValue] WHERE  [value] LIKE ('%' || '"+ search  +@"' || '%') "+((caseSensetive == true) ? @"COLLATE NOCASE" : @"")+@";";
+			string sql = @"SELECT * FROM [main].["+KeyValueTableName+@"] WHERE  ["+ValueName+@"] LIKE ('%' || '"+ search  +@"' || '%') "+((caseSensetive == true) ? @"COLLATE NOCASE" : @"")+@";";
 			DataTable sqlresult = PISDA.PISDA.GetDataTable(sql);
 			
 			List<string> result = new List<string>();
 			foreach(DataRow row in sqlresult.Rows){
-				result.Add((string)row["key"]);
+				result.Add((string)row[KeyName]);
 			}
 			return result;
 		}
@@ -208,7 +213,7 @@ Reset()
 					?	@"OR REPLACE"
 					:	@"OR IGNORE"
 			)
-			+@" INTO [main].[KeyValue] ([key], [value])
+			+@" INTO [main].["+KeyValueTableName+@"] (["+KeyName+@"], ["+ValueName+@"])
 				VALUES('"+key+@"', '"+value+@"');"
 			;
 			
@@ -218,14 +223,14 @@ Reset()
 		
 		//Remove value
 		public static int Remove(string key){
-			string sql = @"DELETE FROM [main].[KeyValue] WHERE key = '"+key+@"';";
+			string sql = @"DELETE FROM [main].["+KeyValueTableName+@"] WHERE "+KeyName+@"= '"+key+@"';";
 			int result = PISDA.PISDA.ExecuteSQL(sql);
 			return result;
 		}
 		
 		//Reset KeyValue
 		public static int Reset(){
-			string sql = @"DELETE FROM [main].[KeyValue];";
+			string sql = @"DELETE FROM [main].["+KeyValueTableName+@"];";
 			int result = PISDA.PISDA.ExecuteSQL(sql);
 			return result;
 		}

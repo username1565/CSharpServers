@@ -33,9 +33,13 @@ namespace Peer
 		}
 		
 		//Method to run Peer Discovery
-		public static void RunDiscoveryPeersInterval(int setPeerDiscoveryInterval = -1){
+		public static void RunDiscoveryPeersInterval(int setPeerDiscoveryInterval = -1){	//set 0 to disable this
 			if(setPeerDiscoveryInterval != -1){
 				PeerDiscoveryInterval = setPeerDiscoveryInterval;
+			}
+			if(PeerDiscoveryInterval == 0){	//disable, if 0
+				Console.WriteLine("PeerDiscoveryInterval = 0, so LocalPeerDiscovery was been disabled.");
+				return;
 			}
 			
 			//run interval

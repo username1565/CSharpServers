@@ -51,24 +51,77 @@ namespace Peer
 {
 	public class Peer
 	{
+		private static string	IP						=	"0.0.0.0"			;	//IP to listen TCP and UDP port
+		private static int		port					=	8082				;	//port
+		private static string	UDPMultiCastGroupIP		=	"235.5.5.11"		;	//Multicast Group IP
+		private static string	localhost				=	"127.0.0.1"			;
+		private static int		PeerDiscoveryInterval	=	15									;	//seconds
+
 		public static void Main(string[] args)
 		{
-			string IP = "0.0.0.0";
-			int port = 8081;
-			string UDPMultiCastGroupIP = "235.5.5.11";
-
-			if(args.Length == 1){
+			Console.WriteLine(
+				@"Usage:
+	Use SQLite3 database:
+Peer.exe IP port MulticastGroupIP PeerDiscoveryInterval DBFilePath TableName KeyName ValueName
+	or use txt-file instead:
+Peer.exe IP port MulticastGroupIP PeerDiscoveryInterval TXTFilePath
+	or disable LDP
+Peer.exe IP port someIP 0 DBFilePath TableName KeyName ValueName
+"
+			);
+			Console.WriteLine("Press any key, to continue...");
+			Console.ReadKey();
+			
+			//port
+			//IP, port
+			//IP, port, MulticastGroupIP
+			
+			if(args.Length == 1){		//TCP and UDP IP (0.0.0.0, by default)
 				port = System.Int32.Parse(args[0]);
 			}
-			else if(args.Length == 2){
+			else if(args.Length > 1){	//port to bind TCP and UDP servers both
 				IP = args[0];
 				port = System.Int32.Parse(args[1]);
 			}
-			else if(args.Length == 3){
-				IP = args[0];
-				port = System.Int32.Parse(args[1]);
+			
+			//next 6 arguments:
+			//	UDPMultiCastGroupIP
+			//	PeerDiscoveryInterval,
+			//	sqlite3 path,
+			//	TableOrViewName,
+			//	KeyName,
+			//	ValueName
+			if(args.Length > 2){	//Multicast Group IP
 				UDPMultiCastGroupIP = args[2];
 			}
+			if(args.Length > 3){
+				PeerDiscoveryInterval = System.Int32.Parse(args[3]);	//PeerDiscoveryInterval, seconds
+				Console.WriteLine("New PeerDiscoveryInterval = "+PeerDiscoveryInterval);
+			}
+			
+			//DHT args
+			if(args.Length > 4){
+				DHT.DHT.DBFilePath = args[4];	//sqlite3 or txt Database Path
+			}
+			if(args.Length > 5){
+				Storage.KeyValue.UseSQLite3 = true;	//enable SQLite3
+				DHT.DHT.HashTableName = args[5];	//HashTable or View Name in SQLite3 database
+			}
+			if(args.Length > 6){
+				DHT.DHT.KeyName = args[6];		//KeyName in HashTable in SQLite3 database
+			}
+			if(args.Length > 7){
+				DHT.DHT.ValueName = args[7];	//ValueName in HashTable in SQLite3 database
+			}
+			
+			Addnode.DefaultPort = port;
+			
+		//raise KeyValue HashTable for DHT, with previous args.
+		
+		//DHT.DHT.RunDHT(args[4], args[5], args[6], args[7]);		//raise KeyValue HashTable for DHT, with previous args.
+		//DHT.DHT.RunDHT(args.Skip(4).ToArray()); //last 4 args
+		DHT.DHT dht = new DHT.DHT();	//just raise with already defined.
+		
 
 			try{
 				//	Raise server-side - TCP/UDP-server with UDP-MultiCastGroupIP
@@ -92,12 +145,12 @@ namespace Peer
 			//	byte[] ResponseBytes;
 			
 				//	Connect, send request, receive response, then disconnect
-				response				=	TCP.Client.Send("127.0.0.1", port, "send and close");
-			//	ResponseBytes			=	TCP.Client.Send("127.0.0.1", port, new byte[]{0,1,2,3,4,5});
+				response				=	TCP.Client.Send(localhost, port, "send and close");
+			//	ResponseBytes			=	TCP.Client.Send(localhost, port, new byte[]{0,1,2,3,4,5});
 				Console.WriteLine(response == "SEND AND CLOSE");
 			
 				//	Connect tcpClient, and keep connection alive
-				TcpClient tcpClient 	=	TCP.Client.Connect("127.0.0.1", port);
+				TcpClient tcpClient 	=	TCP.Client.Connect(localhost, port);
 				//	Send requests using connected tcpClient, and receive responses
 				response				=	TCP.Client.Send(tcpClient, "test2");
 			//	ResponseBytes			=	TCP.Client.Send(tcpClient, new byte[]{0,1,2,3,4,5});
@@ -108,26 +161,26 @@ namespace Peer
 				//		Start UDP clients
 	//			UDP.Client udpClient2 = new UDP.Client(ServerUdpIP, ServerUdpPort, UDPMultiCastGroupIP);
 
-				UDP.Client udpClient = new UDP.Client("127.0.0.1", port);
+				UDP.Client udpClient = new UDP.Client(localhost, port);
 				response = udpClient.Send("test");
 			//	udpClient.Send(new byte[]{0,1,2,3,4,5});
 				Console.WriteLine(response == "TEST");
 				
 
-				UDP.Client udpClient2 = new UDP.Client("127.0.0.1", port);
+				UDP.Client udpClient2 = new UDP.Client(localhost, port);
 				response = udpClient2.Send("test2");
 			//	udpClient2.Send(new byte[]{0,1,2,3,4,5});
 				Console.WriteLine(response == "TEST2");
 
 
 				Console.WriteLine("\n\n" +	"Test UDP Multicast: ");
-				UDP.Client udpClient3 = new UDP.Client("127.0.0.1", port, UDPMultiCastGroupIP);
+				UDP.Client udpClient3 = new UDP.Client(localhost, port, UDPMultiCastGroupIP);
 				response = udpClient3.Send("test");
 			//	udpClient.Send(new byte[]{0,1,2,3,4,5});
 				Console.WriteLine(response == "TEST");
 				
 
-				UDP.Client udpClient4 = new UDP.Client("127.0.0.1", port, UDPMultiCastGroupIP);
+				UDP.Client udpClient4 = new UDP.Client(localhost, port, UDPMultiCastGroupIP);
 				response = udpClient4.Send("test2");
 			//	udpClient2.Send(new byte[]{0,1,2,3,4,5});
 				Console.WriteLine(response == "TEST2");

@@ -14,7 +14,33 @@ namespace DHT
 	{
 		public static Encoding encoding = Encoding.GetEncoding("ISO-8859-1");	//binary encoding, to save bytes.
 	
-		public static KeyValue hashtable = new KeyValue();
+	//	public static KeyValue hashtable = new KeyValue("Hashtable.txt");	//SimpleTXTStorage
+	//	public static KeyValue hashtable = new KeyValue("Hashtable.db3", "KeyValue", "key", "value");	//SQLite3Storage
+	
+		//define this values, from arguments.
+		public static string DBFilePath		= null;
+		public static string HashTableName	= null;
+		public static string KeyName		= null;
+		public static string ValueName		= null;
+
+		public static KeyValue hashtable = null;
+		
+		public DHT(){ //args may be already defined
+			hashtable = new KeyValue(DBFilePath, HashTableName, KeyName, ValueName);	//use sqlite, with values
+		}
+		
+		public static void RunDHT(string[] args){
+			hashtable = new KeyValue(args);	//use sqlite, with values
+		}
+	
+		public static void RunDHT(
+				string DBFilePath = null
+			,	string HashTableName = null
+			,	string KeyName = null
+			,	string ValueName = null
+		){
+			hashtable = new KeyValue(DBFilePath, HashTableName, KeyName, ValueName);	//use sqlite, with values
+		}
 
 		public static int Count(){
 			return hashtable.Count();

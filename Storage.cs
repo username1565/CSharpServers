@@ -9,7 +9,10 @@ namespace Storage
 	{
 		public static string HashTableFileName = "hashtable.txt";
 		
-		public static Hashtable Load(){
+		public static Hashtable Load(string DBFileName = null){
+			if(!String.IsNullOrEmpty(DBFileName)){ //if not null
+				HashTableFileName = DBFileName;	//set this, on load
+			}
 			if(!File.Exists(HashTableFileName)){
 				File.WriteAllText(HashTableFileName, "");
 			}

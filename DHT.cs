@@ -254,14 +254,12 @@ namespace DHT
 		
 		public static void TCPSyncDHT(){
 			try{
-				int keysNum = DHT.Count();
 				foreach(string tcpPeer in Peer.IsPeer.TCPPeers)
 				{
 					string[] IP_PORT = tcpPeer.Split(':');
 					string IP = IP_PORT[0];
 					int port = System.Int32.Parse(IP_PORT[1]);
 					
-					keysNum = DHT.Count();
 					string NextRequest = SyncDHT();
 					string response_string = "";
 			
@@ -276,8 +274,6 @@ namespace DHT
 						NextRequest = SyncDHT(response_string);
 					}
 					while(!(response_string == null || response_string == DHTStub+"ok"));
-					
-					keysNum = DHT.Count();
 				}
 			}
 			catch(Exception ex){
@@ -287,17 +283,13 @@ namespace DHT
 		
 		public static void UDPSyncDHT(){
 			try{
-				int keysNum = DHT.Count();
 				foreach(string tcpPeer in Peer.IsPeer.TCPPeers)
 				{
 					string[] IP_PORT = tcpPeer.Split(':');
 					string IP = IP_PORT[0];
 					int port = System.Int32.Parse(IP_PORT[1]);
 					
-					keysNum = DHT.Count();
 					string NextRequest = SyncDHT();
-					//DHT.HashTable["key2"] = "value2";
-					//DHT.hashtable.Add("key2", "value2");
 					string response_string = "";
 					do{
 						Console.WriteLine("NextRequest: "+NextRequest);
@@ -310,9 +302,6 @@ namespace DHT
 						NextRequest = SyncDHT(response_string);
 					}
 					while(!(response_string == null || response_string == DHTStub+"ok"));
-
-					
-					keysNum = DHT.Count();
 				}
 			}
 			catch(Exception ex){

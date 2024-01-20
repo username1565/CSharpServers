@@ -7,7 +7,9 @@ namespace Peer
 {
 	public class PEX_client
 	{
-		public static List<string> peersLists = new List<string>(){"5.5.5.5"};
+		public static List<string> peersLists = new List<string>(){
+		//	"5.5.5.5"
+		};
 	
 		//use PEX-server's methods
 		public static string ReturnPeersList(){
@@ -93,9 +95,10 @@ namespace Peer
 				Console.WriteLine("2 PEX response: "+response);
 			}
 		}
-*/		
+	
 		public static void PeerExchange(){
 			
 		}
+*/	
 	}
 }

@@ -11,7 +11,7 @@ namespace Peer
 {
 	public class IsPeer
 	{
-		public static HashSet<string> Peers			=	new	HashSet<string>();	//peers TCP or UDP (with multicast not), does not matter.
+		public static HashSet<string> Peers			=	new	HashSet<string>();	//peers TCP or UDP (with multicast or not), does not matter.
 		public static HashSet<string> TCPPeers		=	new	HashSet<string>();	//TCP only peers
 		public static HashSet<string> UDPPeers		=	new	HashSet<string>();	//UDP only peers (with multicast, or not)
 	

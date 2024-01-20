@@ -7,6 +7,7 @@ using System.Linq;										//Dictionary keys to List<string>
 //using System.Uri;										//Uri.EscapeDataString(String), Uri.UnescapeDataString(String)
 using System.Collections;								//Hashtable
 using Storage;	//KeyValue hashtable
+using System.Timers;	//interval
 
 namespace DHT
 {
@@ -254,30 +255,25 @@ namespace DHT
 		
 		public static void TCPSyncDHT(){
 			try{
-				int keysNum = DHT.Count();
-				foreach(string tcpPeer in Peer.IsPeer.TCPPeers)
+				foreach(string tcpPeer in Peer.IsPeer.TCPPeers)	//for each TCP peer
 				{
-					string[] IP_PORT = tcpPeer.Split(':');
-					string IP = IP_PORT[0];
-					int port = System.Int32.Parse(IP_PORT[1]);
+					string[] IP_PORT = tcpPeer.Split(':');		//get
+					string IP = IP_PORT[0];						//IP
+					int port = System.Int32.Parse(IP_PORT[1]);	//PORT
 					
-					keysNum = DHT.Count();
-					string NextRequest = SyncDHT();
-					string response_string = "";
+					string NextRequest = SyncDHT();				//get next request
+					string response_string = "";				//string with response
 			
 					do{
-						Console.WriteLine("NextRequest: "+NextRequest);
-						if(NextRequest == DHTStub+"ok" ){
+						if(NextRequest == DHTStub+"ok" ){	//if already synchronized
 							break;
 						}
-						Console.WriteLine("TCP DHT sync. request: "+NextRequest);
-						response_string = TCP.Client.Send( IP, port, NextRequest );
-						Console.WriteLine("TCP DHT sync. response: "+response_string);
-						NextRequest = SyncDHT(response_string);
+						Console.WriteLine("TCP DHT sync. request: "+NextRequest);	//show request
+						response_string = TCP.Client.Send( IP, port, NextRequest );	//send this to peer
+						Console.WriteLine("TCP DHT sync. response: "+response_string);	//show response
+						NextRequest = SyncDHT(response_string);	//get next request, by response
 					}
-					while(!(response_string == null || response_string == DHTStub+"ok"));
-					
-					keysNum = DHT.Count();
+					while(!(response_string == null || response_string == DHTStub+"ok"));	//and do sync while not synchronized.
 				}
 			}
 			catch(Exception ex){
@@ -287,37 +283,71 @@ namespace DHT
 		
 		public static void UDPSyncDHT(){
 			try{
-				int keysNum = DHT.Count();
-				foreach(string tcpPeer in Peer.IsPeer.TCPPeers)
+				foreach(string udpPeer in Peer.IsPeer.UDPPeers)	//for each alive UDP peer
 				{
-					string[] IP_PORT = tcpPeer.Split(':');
-					string IP = IP_PORT[0];
-					int port = System.Int32.Parse(IP_PORT[1]);
+					string[] IP_PORT = udpPeer.Split(':');		//get
+					string IP = IP_PORT[0];						//IP
+					int port = System.Int32.Parse(IP_PORT[1]);	//port
 					
-					keysNum = DHT.Count();
-					string NextRequest = SyncDHT();
-					//DHT.HashTable["key2"] = "value2";
-					//DHT.hashtable.Add("key2", "value2");
-					string response_string = "";
+					string NextRequest = SyncDHT();				//Get request to start sync DHT
+					string response_string = "";				//string with response.
 					do{
-						Console.WriteLine("NextRequest: "+NextRequest);
-						if(NextRequest == DHTStub+"ok" ){
+						if(NextRequest == DHTStub+"ok" ){	//if already synchronized
 							break;
 						}
-						Console.WriteLine("TCP DHT sync. request: "+NextRequest);
-						response_string = UDP.Client.Send( IP, port, NextRequest );
-						Console.WriteLine("TCP DHT sync. response: "+response_string);
-						NextRequest = SyncDHT(response_string);
+						Console.WriteLine("UDP DHT sync. request: "+NextRequest);		//show request
+						response_string = UDP.Client.Send( IP, port, NextRequest );		//send request to UDP-server to the same IP-port, as TCP peer have.
+						Console.WriteLine("UDP DHT sync. response: "+response_string);	//show response
+						NextRequest = SyncDHT(response_string);							//get next request.
 					}
-					while(!(response_string == null || response_string == DHTStub+"ok"));
-
-					
-					keysNum = DHT.Count();
+					while(!(response_string == null || response_string == DHTStub+"ok"));	//and do sync while not synchronized.
 				}
 			}
 			catch(Exception ex){
 				Console.WriteLine(ex);
 			}
 		}
+		
+		//set interval for sync DHT from peers
+		public static int SyncDHTInterval = 30; //seconds to repeat send UDP MultiCast request to discovery peers.
+
+		//Define timer, to repeat synchronizatino from peers.
+		public static System.Timers.Timer syncDHTTimer = null;	
+
+		public static void TCPUDPSyncDHT(){
+			try{
+				TCPSyncDHT();
+			//	UDPSyncDHT();
+			}
+			catch(Exception ex){
+				Console.WriteLine("SyncDHTByInterval. Exception: " + ex + ". Try to UDPSyncDHT();");
+				UDPSyncDHT();
+			}
+		}
+		//trigger this method, when timer elapsed
+		public static void TCPUDPSyncDHT(object source, ElapsedEventArgs e)
+		{
+			TCPUDPSyncDHT();
+		}
+		
+		//Method to run DHT synchonization from peers.
+		public static void RunSyncDHTByInterval(int setSyncDHTInterval = -1){	//set 0 to disable this
+			if(setSyncDHTInterval != -1){
+				SyncDHTInterval = setSyncDHTInterval;
+			}
+			if(SyncDHTInterval == 0){	//disable, if 0
+				Console.WriteLine("SyncDHTInterval = 0, so sync DHT was been disabled.");
+				return;
+			}
+			
+			TCPUDPSyncDHT();	//Run this on first run, before set interval.
+			
+			//run interval
+			syncDHTTimer = new System.Timers.Timer( SyncDHTInterval * 1000 );
+			syncDHTTimer.Elapsed += new ElapsedEventHandler(TCPUDPSyncDHT);
+			syncDHTTimer.AutoReset = true;
+			syncDHTTimer.Enabled = true;	
+		}
+		
 	}
 }

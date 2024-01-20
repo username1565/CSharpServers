@@ -295,7 +295,7 @@ namespace DHT
 					keysNum = DHT.Count();
 					string NextRequest = SyncDHT();
 					//DHT.HashTable["key2"] = "value2";
-					DHT.hashtable.Add("key2", "value2");
+					//DHT.hashtable.Add("key2", "value2");
 					string response_string = "";
 					do{
 						Console.WriteLine("NextRequest: "+NextRequest);

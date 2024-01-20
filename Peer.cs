@@ -244,13 +244,19 @@ Peer.exe IP port someIP 0 DBFilePath TableName KeyName ValueName
 				//	Check peers, before run DHT-sync
 			//	IsPeer.CheckPeers();
 
-				Console.WriteLine("\n\n" +	"Sync DHT TCP: ");
+			//	Console.WriteLine("\n\n" +	"Sync DHT TCP: ");
 				//	Sync DHT TCP:
-				DHT.DHT_client.TCPSyncDHT();
+			//	DHT.DHT_client.TCPSyncDHT();
 
-				Console.WriteLine("\n\n" +	"Sync DHT UDP: ");
+			//	Console.WriteLine("\n\n" +	"Sync DHT UDP: ");
 				//	Sync DHT UDP:
-				DHT.DHT_client.UDPSyncDHT();
+			//	DHT.DHT_client.UDPSyncDHT();
+				
+			//	Console.WriteLine("\n\n" +	"Sync DHT TCP UDP: ");
+				//	Sync DHT TCP UDP:
+			//	DHT.DHT_client.TCPUDPSyncDHT();
+				
+				DHT.DHT_client.RunSyncDHTByInterval(60);	//run DHT syncrhonization with peers, by interval.
 				
 			}
 			catch(Exception ex){

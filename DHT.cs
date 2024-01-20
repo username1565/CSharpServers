@@ -26,6 +26,8 @@ namespace DHT
 		public static KeyValue hashtable = null;
 		
 		public DHT(){ //args may be already defined
+			//Set this value in KeyValue-Method
+			//Storage.KeyValue.UseSQLite3 = true;	//use SQLite3 db, with defined values.
 			hashtable = new KeyValue(DBFilePath, HashTableName, KeyName, ValueName);	//use sqlite, with values
 		}
 		

@@ -340,6 +340,8 @@ namespace DHT
 				return;
 			}
 			
+			TCPUDPSyncDHT();	//Run this on first run, before set interval.
+			
 			//run interval
 			syncDHTTimer = new System.Timers.Timer( SyncDHTInterval * 1000 );
 			syncDHTTimer.Elapsed += new ElapsedEventHandler(TCPUDPSyncDHT);

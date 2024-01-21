@@ -52,7 +52,7 @@ namespace Peer
 	public class Peer
 	{
 		private static string	IP						=	"0.0.0.0"			;	//IP to listen TCP and UDP port
-		private static int		port					=	8082				;	//port
+		private static int		port					=	8081				;	//port
 		private static string	UDPMultiCastGroupIP		=	"235.5.5.11"		;	//Multicast Group IP
 		private static string	localhost				=	"127.0.0.1"			;
 
@@ -69,7 +69,8 @@ Peer.exe IP port someIP 0 SyncDHTInterval DBFilePath TableName KeyName ValueName
 "
 			);
 			Console.WriteLine("Press any key, to continue...");
-			Console.ReadKey();
+			//Console.ReadKey();
+			System.Threading.Thread.Sleep(2000);
 			
 			//port
 			//IP, port
@@ -120,7 +121,8 @@ Peer.exe IP port someIP 0 SyncDHTInterval DBFilePath TableName KeyName ValueName
 				DHT.DHT.ValueName = args[8];	//ValueName in HashTable in SQLite3 database
 			}
 			
-			Addnode.DefaultPort = port;
+			//Addnode.DefaultPort = port; //it's private static int
+			new Addnode(port);
 			
 		//raise KeyValue HashTable for DHT, with previous args.
 		

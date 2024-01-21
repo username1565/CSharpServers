@@ -15,10 +15,19 @@ namespace Peer
 		public static string addnodesFile = "addnodes.txt";
 		
 		public static int DefaultPort = 8081;
+
+		public static HashSet<string> AddnodeList = new HashSet<string>(){};		//HashSet known peers (nodes)
 		
-		public static HashSet<string> AddnodeList = new HashSet<string>(){		//HashSet known peers (nodes)
-			"127.0.0.1:"+DefaultPort
-		};
+		//new Addnode(setDefaultPort);
+		public Addnode(
+			int setDefaultPort = -1
+		)
+		{
+			if(setDefaultPort != -1){
+				DefaultPort = setDefaultPort;
+			}
+			AddnodeList.Add("127.0.0.1:"+DefaultPort);
+		}
 		
 		public static HashSet<string> ReadAddNodes()
 		{

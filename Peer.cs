@@ -121,7 +121,7 @@ Peer.exe IP port someIP 0 SyncDHTInterval DBFilePath TableName KeyName ValueName
 				DHT.DHT.ValueName = args[8];	//ValueName in HashTable in SQLite3 database
 			}
 			
-			Addnode.DefaultPort = port;
+			//Addnode.DefaultPort = port; //it's private static int
 			new Addnode(port);
 			
 		//raise KeyValue HashTable for DHT, with previous args.

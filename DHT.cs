@@ -309,7 +309,7 @@ namespace DHT
 		}
 		
 		//set interval for sync DHT from peers
-		public static int SyncDHTInterval = 30; //seconds to repeat send UDP MultiCast request to discovery peers.
+		public static int SyncDHTInterval = 60; //seconds to repeat send UDP MultiCast request to discovery peers.
 
 		//Define timer, to repeat synchronizatino from peers.
 		public static System.Timers.Timer syncDHTTimer = null;	

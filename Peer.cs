@@ -55,18 +55,17 @@ namespace Peer
 		private static int		port					=	8082				;	//port
 		private static string	UDPMultiCastGroupIP		=	"235.5.5.11"		;	//Multicast Group IP
 		private static string	localhost				=	"127.0.0.1"			;
-		private static int		PeerDiscoveryInterval	=	15									;	//seconds
 
 		public static void Main(string[] args)
 		{
 			Console.WriteLine(
 				@"Usage:
 	Use SQLite3 database:
-Peer.exe IP port MulticastGroupIP PeerDiscoveryInterval DBFilePath TableName KeyName ValueName
+Peer.exe IP port MulticastGroupIP PeerDiscoveryInterval SyncDHTInterval DBFilePath TableName KeyName ValueName
 	or use txt-file instead:
-Peer.exe IP port MulticastGroupIP PeerDiscoveryInterval TXTFilePath
+Peer.exe IP port MulticastGroupIP PeerDiscoveryInterval SyncDHTInterval TXTFilePath
 	or disable LDP
-Peer.exe IP port someIP 0 DBFilePath TableName KeyName ValueName
+Peer.exe IP port someIP 0 SyncDHTInterval DBFilePath TableName KeyName ValueName
 "
 			);
 			Console.WriteLine("Press any key, to continue...");
@@ -84,9 +83,10 @@ Peer.exe IP port someIP 0 DBFilePath TableName KeyName ValueName
 				port = System.Int32.Parse(args[1]);
 			}
 			
-			//next 6 arguments:
+			//next 7 arguments:
 			//	UDPMultiCastGroupIP
 			//	PeerDiscoveryInterval,
+			//	SyncDHTInterval,
 			//	sqlite3 path,
 			//	TableOrViewName,
 			//	KeyName,
@@ -94,24 +94,30 @@ Peer.exe IP port someIP 0 DBFilePath TableName KeyName ValueName
 			if(args.Length > 2){	//Multicast Group IP
 				UDPMultiCastGroupIP = args[2];
 			}
+			
+			//intervals
 			if(args.Length > 3){
-				PeerDiscoveryInterval = System.Int32.Parse(args[3]);	//PeerDiscoveryInterval, seconds
-				Console.WriteLine("New PeerDiscoveryInterval = "+PeerDiscoveryInterval);
+				LocalPeersDiscovery.PeerDiscoveryInterval = System.Int32.Parse(args[3]);	//PeerDiscoveryInterval, seconds
+				Console.WriteLine("New LocalPeersDiscovery.PeerDiscoveryInterval = "+LocalPeersDiscovery.PeerDiscoveryInterval);
+			}
+			if(args.Length > 4){
+				DHT.DHT_client.SyncDHTInterval = System.Int32.Parse(args[4]);	//SyncDHTInterval, seconds
+				Console.WriteLine("New DHT.DHT_client.SyncDHTInterval = "+DHT.DHT_client.SyncDHTInterval);
 			}
 			
 			//DHT args
-			if(args.Length > 4){
-				DHT.DHT.DBFilePath = args[4];	//sqlite3 or txt Database Path
-			}
 			if(args.Length > 5){
-				Storage.KeyValue.UseSQLite3 = true;	//enable SQLite3
-				DHT.DHT.HashTableName = args[5];	//HashTable or View Name in SQLite3 database
+				DHT.DHT.DBFilePath = args[5];	//sqlite3 or txt Database Path
 			}
 			if(args.Length > 6){
-				DHT.DHT.KeyName = args[6];		//KeyName in HashTable in SQLite3 database
+				Storage.KeyValue.UseSQLite3 = true;	//enable SQLite3
+				DHT.DHT.HashTableName = args[6];	//HashTable or View Name in SQLite3 database
 			}
 			if(args.Length > 7){
-				DHT.DHT.ValueName = args[7];	//ValueName in HashTable in SQLite3 database
+				DHT.DHT.KeyName = args[7];		//KeyName in HashTable in SQLite3 database
+			}
+			if(args.Length > 8){
+				DHT.DHT.ValueName = args[8];	//ValueName in HashTable in SQLite3 database
 			}
 			
 			Addnode.DefaultPort = port;
@@ -119,7 +125,7 @@ Peer.exe IP port someIP 0 DBFilePath TableName KeyName ValueName
 		//raise KeyValue HashTable for DHT, with previous args.
 		
 		//DHT.DHT.RunDHT(args[4], args[5], args[6], args[7]);		//raise KeyValue HashTable for DHT, with previous args.
-		//DHT.DHT.RunDHT(args.Skip(4).ToArray()); //last 4 args
+		//DHT.DHT.RunDHT(args.Skip(5).ToArray()); //last 4 args
 		DHT.DHT dht = new DHT.DHT();	//just raise with already defined.
 		
 
@@ -216,7 +222,7 @@ Peer.exe IP port someIP 0 DBFilePath TableName KeyName ValueName
 
 				Console.WriteLine("\n\n" +	"Run interval for LDP (Local Peer Discovery)... ");
 //				//Run interval for LDP (Local Peer Discovery)
-				LocalPeersDiscovery.RunDiscoveryPeersInterval(5);	//seconds
+				LocalPeersDiscovery.RunDiscoveryPeersInterval();	//seconds
 			
 			
 			

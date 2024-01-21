@@ -14,7 +14,7 @@ namespace Peer
 	public class LocalPeersDiscovery
 	{
 		//set interval for Peer Discovery
-		public static int PeerDiscoveryInterval = 1; //seconds to repeat send UDP MultiCast request to discovery peers.
+		public static int PeerDiscoveryInterval = 300; //seconds to repeat send UDP MultiCast request to discovery peers.
 		
 		//Method to run Peer Discovery
 		public static void DiscoveryPeers(){
@@ -41,6 +41,8 @@ namespace Peer
 				Console.WriteLine("PeerDiscoveryInterval = 0, so LocalPeerDiscovery was been disabled.");
 				return;
 			}
+			
+			DiscoveryPeers();	//run before timer elapsed
 			
 			//run interval
 			aTimer = new System.Timers.Timer( PeerDiscoveryInterval * 1000 );

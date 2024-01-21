@@ -14,7 +14,7 @@ namespace Peer
 	{
 		public static string addnodesFile = "addnodes.txt";
 		
-		public static int DefaultPort = 8081;
+		private static int DefaultPort = 8081;
 
 		public static HashSet<string> AddnodeList = new HashSet<string>(){};		//HashSet known peers (nodes)
 		
